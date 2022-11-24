@@ -7,7 +7,6 @@ from scipy.stats import dirichlet
 
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
-from mapel.allocations.core.alloctask import AllocationTask
 
 def identity_alloct_matrix(agents_cnt, resources_cnt):
 	# 1 0 0 … 0
