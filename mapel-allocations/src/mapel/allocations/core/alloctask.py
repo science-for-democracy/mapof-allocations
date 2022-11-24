@@ -1,6 +1,8 @@
 from fractions import Fraction
+import os
 
 from mapel.core.objects.Instance import Instance
+from mapel.core.utils import make_folder_if_do_not_exist
 
 class AllocationTask(Instance):
   """
@@ -65,3 +67,44 @@ class AllocationTask(Instance):
         if type(val) not in (float, int, Fraction):
           raise ValueError("Each row in an allocation task matrix must be an "
           "int or float")
+
+class AllocationTaskLibrarian:
+  def read(self, instance_id, location):
+    path_to_file = os.path.join(location, instance_id + ".alt")
+
+    with open(path_to_file, "r") as ffile:
+      utility_matrix = None
+      line_counter = 0
+      for line in ffile:
+        line_counter += 1
+        line = line.strip()
+        if line_counter == 1:
+          agents_cnt, res_cnt = map(int, line.split(" "))
+          utility_matrix = []
+        elif line != "":
+          fractions = line.split(" ")
+          fractions = list(map(Fraction, fractions))
+          utility_matrix.append(fractions)
+
+    return AllocationTask.from_matrix(utility_matrix, instance_id)
+
+   
+  def write(self, allocation, location):
+    self._prepare_location(location)
+    path_to_file = os.path.join(location,  f'{allocation.instance_id}.alt')
+
+    with open(path_to_file, "w") as ffile:
+      agents_cnt = allocation.agents_count
+      res_cnt = allocation.resources_count
+      ffile.write(f"{agents_cnt} {res_cnt}\n")
+      ffile.write("\n")
+      for row in allocation.utility_matrix:
+        for entry in row[:-1]:
+          ffile.write(f"{entry} ") 
+        ffile.write(f"{row[-1]}\n")
+
+  def _prepare_location(self, location):
+    make_folder_if_do_not_exist(location)
+    
+
+
