@@ -1,9 +1,16 @@
+import os
+import csv
+import time
+
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
+
+import mapel.core.utils as utils
 
 from mapel.core.objects.Family import Family
 from mapel.core.objects.Experiment import Experiment
 import mapel.allocations.metrics.surveying as surveying
+
 
 class AllocationTaskFamily(Family):
   
@@ -207,17 +214,44 @@ class AllocationExperiment(Experiment):
                     ids.append((instance_1, instance_2))
          
         for left_task_id, right_task_id in ids:
+          st_time = time.time() 
           distance, matching = \
           surveying.get_distance(self.instances[left_task_id],
           self.instances[right_task_id], distance_id) 
           distances[left_task_id][right_task_id] = distance
           matchings[left_task_id][right_task_id] = matching
+          times[left_task_id][right_task_id] = time.time() - st_time
 
         logger.debug(f"Computed distances:\n{distances}")
 
         self.distances = distances
         self.times = times
         self.matchings = matchings
+
+        if self.store:
+          self._store_distances_to_file(distance_id, self.distances, self.times,
+          self_distances )
+
+
+    def _store_distances_to_file(self, distance_id, distances, times, self_distances):
+        path_to_folder = os.path.join(os.getcwd(), "experiments", self.experiment_id, "distances")
+        utils.make_folder_if_do_not_exist(path_to_folder)
+        path_to_file = os.path.join(path_to_folder, f'{distance_id}.csv')
+
+        logger.debug(f"Storing distances in: {path_to_file}")
+
+        with open(path_to_file, 'w', newline='') as csv_file:
+            writer = csv.writer(csv_file, delimiter=';')
+            writer.writerow(["instance_id_1", "instance_id_2", "distance", "time"])
+
+            for i, election_1 in enumerate(self.instances):
+                for j, election_2 in enumerate(self.instances):
+                    if i < j or (i == j and self_distances):
+                        distance = str(distances[election_1][election_2])
+                        time_ = str(times[election_1][election_2])
+                        writer.writerow([election_1, election_2, distance, time_])
+
+        logger.debug(f"Distances stored!")
 
     def get_election_id_from_model_name(self, culture_id: str) -> str:
         for family_id in self.families:
