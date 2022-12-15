@@ -23,26 +23,18 @@ class AllocationTask(Instance):
     return AllocationTask(utility_matrix, None, instance_id)
 
   @classmethod
-  def from_splidditfile(cls, fname, instance_id):
-    utility_matrix = []
-    with open(fname, 'r') as ffile:
-      linecnt = 0
-      for line in ffile:
-        linecnt += 1
-        if linecnt == 1:
-          agnt_cnt, res_cnt = (int(val) for val in line.strip().split(" "))
-          continue
-        if linecnt == 2:
-          continue
-        if (linecnt > 2) and (linecnt <= 2 + agnt_cnt):
-          utility_matrix.append([int(val) for val in line.strip().split()])
-        continue
-    return AllocationTask(utility_matrix, None, instance_id)
+  def from_splidditfile(cls, instance_id, agents_count, resources_count,
+  culture_id, fpath, **kwargs):
+    utility_matrix = pot.get_matr_for_culture("from_spliddit", agents_count,
+    resources_count, {"path" : fpath})
+    return AllocationTask(utility_matrix, None, instance_id, culture_id,
+    **kwargs)
 
   @classmethod
   def from_culture(cls, instance_id, agents_count, resources_count, culture_id,
-  **kwargs):
-    utility_matrix = pot.get_matr_for_culture(culture_id, agents_count, resources_count)
+  params = {}, **kwargs):
+    utility_matrix = pot.get_matr_for_culture(culture_id, agents_count,
+    resources_count, params)
     return AllocationTask(utility_matrix, None, instance_id, culture_id,
     **kwargs)
 
@@ -112,7 +104,7 @@ class AllocationTaskLibrarian:
     self._prepare_location(location)
     path_to_file = os.path.join(location,  f'{allocation.instance_id}.alt')
 
-    logger.debug(f"Writing allocationt task to: {path_to_file}")
+    logger.debug(f"Writing allocation task to: {path_to_file}")
 
     with open(path_to_file, "w") as ffile:
       agents_cnt = allocation.agents_count

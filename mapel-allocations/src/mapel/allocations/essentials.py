@@ -70,17 +70,45 @@ class AllocationTaskFamily(Family):
       return self.allocation_tasks
 
     instances = {}
-    for j in range(self.size):
-      instance_id = get_instance_id(self.single, self.family_id, j)
-      instance = AllocationTask.from_culture(instance_id, culture_id=self.culture_id,
-                                           agents_count = self.agents_count,
-                                           resources_count =
-                                           self.resources_count, label=self.label
-                                           )
-      instances[instance_id] = instance
-      if store:
-       lib = AllocationTaskLibrarian()
-       lib.write(instance, os.path.join("experiments", experiment_id, "instances"))
+
+    # This is at the moment, a dirty hack which adds
+    # unnecessary conditional on a culture name
+    # In th efuture, there should be a possibility to also
+    # define aggregate of the same cultures over multiple parameters
+    # as an "automatic" family
+    if self.culture_id == "collect_spliddit":
+      basepath = self.params["basepath"]
+      logger.debug(f"Collecting spliddit instaces from '{basepath}' ("
+      f"{self.agents_count} agents and {self.resources_count} resources)")
+      for root, dirs, files in os.walk(basepath):
+        if root != basepath:
+          continue
+        for filename in files:
+          if not filename.startswith(f"{self.agents_count}_{self.resources_count}_"):
+            continue
+          logger.info(f"Collecting {filename}")
+          instance_filename  = os.path.join(root, filename)
+          spliddit_id = filename.split(".")[0].split("_")[2]
+          instance_id = "S_" + spliddit_id
+          culture_id = self.culture_id
+          instance = AllocationTask.from_splidditfile(instance_id,
+          self.agents_count, self.resources_count, culture_id, instance_filename)
+          instances[instance_id] = instance
+    else:
+      for j in range(self.size):
+        instance_id = get_instance_id(self.single, self.family_id, j)
+        instance = AllocationTask.from_culture(instance_id, culture_id=self.culture_id,
+                                             agents_count = self.agents_count,
+                                             resources_count =
+                                             self.resources_count,
+                                             label=self.label, params =
+                                             self.params
+                                             )
+        instances[instance_id] = instance
+
+    if store:
+     lib = AllocationTaskLibrarian()
+     lib.write(instance, os.path.join("experiments", experiment_id, "instances"))
 
     self.instance_ids = instances.keys()
 

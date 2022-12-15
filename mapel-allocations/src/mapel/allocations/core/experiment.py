@@ -54,6 +54,9 @@ class AllocationExperiment(Experiment):
     def import_controllers(self):
         """ Import controllers from a file """
         families = {}
+
+        if not os.path.isfile(self.map_csv_path):
+          raise ValueError(f"{self.map_csv_path} does not exist!")
         with open(self.map_csv_path, 'r') as file_:
 
             header = [h.strip() for h in file_.readline().split(';')]
@@ -114,6 +117,9 @@ class AllocationExperiment(Experiment):
                     show = row['show'].strip() == 't'
 
                 single = size == 1
+
+                if not label:
+                  label = family_id
 
                 families[family_id] = AllocationTaskFamily.from_culture(culture_id=culture_id,
                                                      family_id=family_id,

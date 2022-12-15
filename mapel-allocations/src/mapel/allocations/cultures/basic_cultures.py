@@ -7,6 +7,7 @@ from scipy.stats import dirichlet
 
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
+from .tools import float_matrix_to_rational
 
 def identity_alloct_matrix(agents_cnt, resources_cnt):
 	# 1 0 0 … 0
@@ -20,8 +21,7 @@ def identity_alloct_matrix(agents_cnt, resources_cnt):
 
 def uniformity_alloct_matrix(agents_cnt, resources_cnt):
 	# 1/m 1/m … 1/m
-	# 1/m 1/m … 1/m
-	# …
+	# 1/m 1/m … 1/m # …
 	# 1/m 1/m … 1/m
 	logger.debug("Creating the UN allocation task matrix")
 	row = [Fraction(1, resources_cnt) for _ in range(resources_cnt)]
@@ -44,21 +44,18 @@ def separability_alloct_matrix(agents_cnt, resources_cnt):
 
 
 def dirichlet_matrix(agents_cnt, resources_cnt, alphas = None):
-	"""For each agent independently, draw their values from a scaled Dirichlet distribution. The Dirichlet distribution
-	is parameterized by values αⱼ>0 for each resource j, which can bias the randomness towards high values for some
-	resources. If the argument `alphas` is not specified, the alphas are all set to 1, which corresponds to values being
-	drawn uniformly from the (scaled) standard simplex.
-	"""
-	if alphas is None:
-		alphas = [1. for _ in range(resources_cnt)]
-	assert len(alphas) == resources_cnt
+  """For each agent independently, draw their values from a scaled Dirichlet distribution. The Dirichlet distribution
+  is parameterized by values αⱼ>0 for each resource j, which can bias the randomness towards high values for some
+  resources. If the argument `alphas` is not specified, the alphas are all set to 1, which corresponds to values being
+  drawn uniformly from the (scaled) standard simplex.
+  """
 
-	float_matrix = (dirichlet.rvs(alphas, size=agents_cnt)).tolist()
-	rational_matrix = []
-	for float_row in float_matrix:
-			rational_row = [Fraction(value) for value in float_row]
-			row_sum = sum(rational_row)
-			rational_row = [value / row_sum for value in rational_row]
-			rational_matrix.append(rational_row)
-	return rational_matrix
+  logger.debug(alphas)
+  if alphas is None:
+    alphas = [1. for _ in range(resources_cnt)]
+  assert len(alphas) == resources_cnt
+  
+  float_matrix = (dirichlet.rvs(alphas, size=agents_cnt)).tolist()
+  rational_matrix = float_matrix_to_rational(float_matrix)
+  return rational_matrix
 
