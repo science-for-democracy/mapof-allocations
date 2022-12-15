@@ -83,6 +83,9 @@ class AllocationTaskLibrarian:
     path_to_file = os.path.join(location, instance_id + ".alt")
     logger.debug(f"Reading in from file: {path_to_file}")
 
+    if not os.path.exists(path_to_file):
+      raise ValueError(f"No file: {path_to_file}")
+
     with open(path_to_file, "r") as ffile:
       utility_matrix = None
       line_counter = 0

@@ -71,7 +71,7 @@ class AllocationTaskFamily(Family):
 
     instances = {}
 
-    # This is at the moment, a dirty hack which adds
+    # This is a dirty hack which adds
     # unnecessary conditional on a culture name
     # In th efuture, there should be a possibility to also
     # define aggregate of the same cultures over multiple parameters
@@ -80,6 +80,7 @@ class AllocationTaskFamily(Family):
       basepath = self.params["basepath"]
       logger.debug(f"Collecting spliddit instaces from '{basepath}' ("
       f"{self.agents_count} agents and {self.resources_count} resources)")
+      counter = 0
       for root, dirs, files in os.walk(basepath):
         if root != basepath:
           continue
@@ -88,12 +89,11 @@ class AllocationTaskFamily(Family):
             continue
           logger.info(f"Collecting {filename}")
           instance_filename  = os.path.join(root, filename)
-          spliddit_id = filename.split(".")[0].split("_")[2]
-          instance_id = "S_" + spliddit_id
-          culture_id = self.culture_id
+          instance_id = get_instance_id(self.single, self.family_id, counter)
           instance = AllocationTask.from_splidditfile(instance_id,
-          self.agents_count, self.resources_count, culture_id, instance_filename)
+          self.agents_count, self.resources_count, self.culture_id, instance_filename)
           instances[instance_id] = instance
+          counter += 1
     else:
       for j in range(self.size):
         instance_id = get_instance_id(self.single, self.family_id, j)
@@ -107,8 +107,9 @@ class AllocationTaskFamily(Family):
         instances[instance_id] = instance
 
     if store:
-     lib = AllocationTaskLibrarian()
-     lib.write(instance, os.path.join("experiments", experiment_id, "instances"))
+      for instance in instances.values():
+        lib = AllocationTaskLibrarian()
+        lib.write(instance, os.path.join("experiments", experiment_id, "instances"))
 
     self.instance_ids = instances.keys()
 

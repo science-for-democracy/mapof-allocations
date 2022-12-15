@@ -195,13 +195,22 @@ class AllocationExperiment(Experiment):
           logger.debug(f"Reading in family: {family_id}")
           single = self.families[family_id].single
 
+
           ids = []
-          for j in range(self.families[family_id].size):
+          instances_count = self.families[family_id].size
+          # A hack for families of time unknown at the time of wriitn map.csv
+          if instances_count == 0:
+            instances_count = 999999999999
+          for j in range(instances_count):
               instance_id = get_instance_id(single, family_id, j)
               logger.debug(f"Reading in instance: {instance_id}")
 
-              instance = AllocationTask.from_file(instance_id,
-              self.experiment_id)
+              # The hack continued
+              try:
+                instance = AllocationTask.from_file(instance_id,
+                self.experiment_id)
+              except ValueError:
+                break
 
               instances[instance_id] = instance
               ids.append(str(instance_id))
