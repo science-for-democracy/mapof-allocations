@@ -10,7 +10,6 @@ import mapel.core.utils as utils
 
 from mapel.core.objects.Family import Family
 from mapel.allocations.core.alloctask import AllocationTask, AllocationTaskLibrarian
-import mapel.allocations.metrics.surveying as surveying
 from mapel.core.utils import get_instance_id
 
 
