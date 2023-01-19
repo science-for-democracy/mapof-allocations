@@ -3,7 +3,7 @@ from fractions import Fraction
 # The reason is that rounding or floating point errors might otherwise introduce envy
 # where no envy originally exists.
 
-from scipy.stats import dirichlet
+from numpy.random import default_rng
 
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
@@ -55,7 +55,7 @@ def dirichlet_matrix(agents_cnt, resources_cnt, alphas = None):
     alphas = [1. for _ in range(resources_cnt)]
   assert len(alphas) == resources_cnt
   
-  float_matrix = (dirichlet.rvs(alphas, size=agents_cnt)).tolist()
+  float_matrix = default_rng().dirichlet(alphas, size=agents_cnt)
   rational_matrix = float_matrix_to_rational(float_matrix)
   return rational_matrix
 
