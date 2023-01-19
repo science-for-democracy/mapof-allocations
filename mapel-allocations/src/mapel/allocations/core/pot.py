@@ -17,7 +17,7 @@ def get_matr_for_culture(culture_id: str,
                 resources_count: int,
                 params: dict = {}):
     # TODO: consider the params argument; do we want to use **kwargs instead?
-    logger.warning(f'Getting: {culture_id}')
+    logger.debug(f'Getting: {culture_id}')
     if generator := registered_cultures_of_alloct_matrix.get(culture_id, None):
       return generator(agents_count, resources_count, **params)
 

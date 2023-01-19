@@ -290,14 +290,17 @@ class AllocationExperiment(Experiment):
                 if i < j or (i == j and self_distances):
                     ids.append((instance_1, instance_2))
          
-        for left_task_id, right_task_id in ids:
-          st_time = time.time() 
-          distance, matching = \
-          surveying.get_distance(self.instances[left_task_id],
-          self.instances[right_task_id], distance_id) 
-          distances[left_task_id][right_task_id] = distance
-          matchings[left_task_id][right_task_id] = matching
-          times[left_task_id][right_task_id] = time.time() - st_time
+        from tqdm import tqdm
+        with tqdm(total=len(ids)) as pbar:
+          for left_task_id, right_task_id in ids:
+            st_time = time.time() 
+            distance, matching = \
+            surveying.get_distance(self.instances[left_task_id],
+            self.instances[right_task_id], distance_id) 
+            distances[left_task_id][right_task_id] = distance
+            matchings[left_task_id][right_task_id] = matching
+            times[left_task_id][right_task_id] = time.time() - st_time
+            pbar.update(1)
 
         logger.debug(f"Computed distances:\n{distances}")
 
