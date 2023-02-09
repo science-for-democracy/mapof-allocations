@@ -114,7 +114,7 @@ def rr_distance(left_task, right_task, *args, **kwargs):
   #logger.debug("Computing single rr distance")
   _validate(left_task, right_task)
 
-  trials = 20
+  trials = 30
   n = left_task.agents_count
 
   min_dist = n*n
