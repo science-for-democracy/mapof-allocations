@@ -90,8 +90,10 @@ class AllocationTaskLibrarian:
       utility_matrix = None
       line_counter = 0
       for line in ffile:
-        line_counter += 1
         line = line.strip()
+        if line.startswith("#"):
+          continue
+        line_counter += 1
         if line_counter == 1:
           agents_cnt, res_cnt = map(int, line.split(" "))
           utility_matrix = []
@@ -118,6 +120,13 @@ class AllocationTaskLibrarian:
         for entry in row[:-1]:
           ffile.write(f"{entry} ") 
         ffile.write(f"{row[-1]}\n")
+      ffile.write("\n")
+      for row in allocation.utility_matrix:
+        ffile.write("# ") 
+        outstr = "\t".join(map(str, [round(float(n), 5) for n in row]))
+        ffile.write(f"{outstr}\n") 
+      
+
 
   def _prepare_location(self, location):
     make_folder_if_do_not_exist(location)
