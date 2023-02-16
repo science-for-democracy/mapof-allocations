@@ -18,7 +18,8 @@ registered_cultures_of_alloct_matrix = {
     'idun': paths.get_idun_path_utility_matrix,
     'idsep': paths.get_idsep_path_utility_matrix,
     'unsep': paths.get_unsep_path_utility_matrix,
-
+    "dirichlet_shift": basic.dirichlet_shift_matrix,
+    "blurred_separability": basic.blurred_separability_alloct_matrix
 }
 
 
