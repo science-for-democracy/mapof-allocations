@@ -1,10 +1,11 @@
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
 
-from mapel.allocations.metrics import idealdist, rrobin
+from mapel.allocations.metrics import idealdist, rrobin, fastdist
 
-__distances = { "ideal": idealdist.ideal_distance,
-                "round-robin": rrobin.rr_distance}
+__distances = { 'ideal': idealdist.ideal_distance,
+                'round-robin': rrobin.rr_distance,
+                'fast': fastdist.fast_distance}
 
 def get_distance(left_task, right_task, distance_id):
     """ Return: distance between instances, (if applicable) optimal matching """

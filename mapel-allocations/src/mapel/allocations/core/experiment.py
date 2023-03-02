@@ -338,82 +338,29 @@ class AllocationExperiment(Experiment):
             if self.families[family_id].culture_id == culture_id:
                 return family_id
 
-#    def compute_feature(self, feature_id: str = None, feature_params=None,
-#                        printing=False, **kwargs) -> dict:
-#
-#        if feature_params is None:
-#            feature_params = {}
-#
-#        if feature_id in ['priceability', 'core', 'ejr']:
-#            feature_long_id = f'{feature_id}_{feature_params["rule"]}'
-#        else:
-#            feature_long_id = feature_id
-#
-#        num_iterations = 1
-#        if 'num_interations' in feature_params:
-#            num_iterations = feature_params['num_interations']
-#
-#        if feature_id == 'ejr':
-#            feature_dict = {'value': {}, 'time': {}, 'ejr': {}, 'pjr': {}, 'jr': {}, 'pareto': {}}
-#        elif feature_id in FEATURES_WITH_DISSAT:
-#            feature_dict = {'value': {}, 'time': {}, 'dissat': {}}
-#        else:
-#            feature_dict = {'value': {}, 'time': {}}
-#
-#        if feature_id in MAIN_GLOBAL_FEATUERS or feature_id in ELECTION_GLOBAL_FEATURES:
-#
-#            feature = features.get_global_feature(feature_id)
-#
-#            values = feature(self, election_ids=list(self.instances), feature_params=feature_params)
-#
-#            for instance_id in self.instances:
-#                feature_dict['value'][instance_id] = values[instance_id]
-#                feature_dict['time'][instance_id] = 0
-#
-#        else:
-#            feature = features.get_local_feature(feature_id)
-#
-#            for instance_id in self.elections:
-#                if printing:
-#                    print(instance_id)
-#                instance = self.elections[instance_id]
-#
-#                start = time.time()
-#
-#                for _ in range(num_iterations):
-#
-#                    if feature_id in ['monotonicity_1', 'monotonicity_triplets']:
-#                        value = feature(self, instance)
-#
-#                    elif feature_id in {'avg_distortion_from_guardians',
-#                                        'worst_distortion_from_guardians',
-#                                        'distortion_from_all',
-#                                        'distortion_from_top_100'}:
-#                        value = feature(self, instance_id)
-#                    else:
-#                        value = instance.get_feature(feature_id, feature_long_id, **kwargs)
-#
-#                total_time = time.time() - start
-#                total_time /= num_iterations
-#
-#                if feature_id == 'ejr':
-#                    feature_dict['ejr'][instance_id] = int(value['ejr'])
-#                    feature_dict['pjr'][instance_id] = int(value['pjr'])
-#                    feature_dict['jr'][instance_id] = int(value['jr'])
-#                    feature_dict['pareto'][instance_id] = int(value['pareto'])
-#                    feature_dict['time'][instance_id] = total_time
-#
-#                elif feature_id in FEATURES_WITH_DISSAT:
-#                    feature_dict['value'][instance_id] = value[0]
-#                    feature_dict['time'][instance_id] = total_time
-#                    feature_dict['dissat'][instance_id] = value[1]
-#                else:
-#                    feature_dict['value'][instance_id] = value
-#                    feature_dict['time'][instance_id] = total_time
-#
-#        if self.store:
-#            self._store_election_feature(feature_id, feature_long_id, feature_dict)
-#
-#        self.features[feature_long_id] = feature_dict
-#        return feature_dict
+    def add_feature(self, name, function):
+        self.features[name] = function
+
+    def compute_feature(self, feature_id: str = None, feature_params=None,
+                       printing=False, **kwargs) -> dict:
+
+        if feature_params is None:
+            feature_params = {}
+
+        feature_dict = {'value': {}}
+
+        for instance_id in self.instances:
+            if printing:
+                print(instance_id)
+            instance = self.instances[instance_id]
+
+            value = self.features[feature_id](instance)
+
+            feature_dict['value'][instance_id] = value
+
+        # if self.store:
+        #     self._store_feature(feature_id, feature_long_id, feature_dict)
+
+        self.features[feature_id] = feature_dict
+        return feature_dict
 

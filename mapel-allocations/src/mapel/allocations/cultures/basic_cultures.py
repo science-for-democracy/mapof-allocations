@@ -9,21 +9,21 @@ import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational
 
-def identity_alloct_matrix(agents_cnt, resources_cnt):
+def contention_alloct_matrix(agents_cnt, resources_cnt):
 	# 1 0 0 … 0
 	# 1 0 0 … 0
 	# …
 	# 1 0 0 … 0
-	logger.debug("Creating the ID allocation task matrix")
+	logger.debug("Creating the CON allocation task matrix")
 	row = [Fraction(1)] + [Fraction(0) for _ in range(resources_cnt - 1)]
 	return [row for _ in range(agents_cnt)]
 
 
-def uniformity_alloct_matrix(agents_cnt, resources_cnt):
+def indifference_alloct_matrix(agents_cnt, resources_cnt):
 	# 1/m 1/m … 1/m
 	# 1/m 1/m … 1/m # …
 	# 1/m 1/m … 1/m
-	logger.debug("Creating the UN allocation task matrix")
+	logger.debug("Creating the IND allocation task matrix")
 	row = [Fraction(1, resources_cnt) for _ in range(resources_cnt)]
 	return [row for _ in range(agents_cnt)]
 
