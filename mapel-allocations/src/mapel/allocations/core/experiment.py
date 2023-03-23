@@ -358,8 +358,9 @@ class AllocationExperiment(Experiment):
 
             feature_dict['value'][instance_id] = value
 
-        # if self.store:
-        #     self._store_feature(feature_id, feature_long_id, feature_dict)
+        if self.store:
+            feature_long_id = feature_id
+            self.store_feature(feature_dict, saveas=feature_long_id)
 
         self.features[feature_id] = feature_dict
         return feature_dict
