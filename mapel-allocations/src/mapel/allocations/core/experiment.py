@@ -1,7 +1,12 @@
+import itertools
 import os
 import csv
 import ast
 import time
+
+from matplotlib import pyplot as plt
+from scipy.stats import stats
+from tqdm import tqdm
 
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
@@ -10,6 +15,7 @@ from mapel.allocations.essentials import AllocationTaskFamily
 from mapel.allocations.core.alloctask import AllocationTask
 from mapel.core.utils import get_instance_id, make_folder_if_do_not_exist
 import mapel.allocations.metrics.surveying as surveying
+from mapel.allocations.core.pot import registered_features_of_alloct_matrix
 
 
 class AllocationExperiment(Experiment):
@@ -167,27 +173,6 @@ class AllocationExperiment(Experiment):
             for instance_id in new_instances:
                 self.instances[instance_id] = new_instances[instance_id]
 
-
-
-#    def prepare_matrices(self):
-#        path = os.path.join(os.getcwd(), "experiments", self.experiment_id, "matrices")
-#        for file_name in os.listdir(path):
-#            os.remove(os.path.join(path, file_name))
-#
-#        for election_id in self.elections:
-#            matrix = self.elections[election_id].votes_to_positionwise_matrix()
-#            file_name = election_id + ".csv"
-#            path = os.path.join(os.getcwd(), "experiments", self.experiment_id,
-#                                "matrices", file_name)
-#
-#            with open(path, 'w', newline='') as csv_file:
-#
-#                writer = csv.writer(csv_file, delimiter=';')
-#                header = [str(i) for i in range(self.elections[election_id].num_candidates)]
-#                writer.writerow(header)
-#                for row in matrix:
-#                    writer.writerow(row)
-
     def add_instances_to_experiment(self):
         instances = {}
 
@@ -339,7 +324,7 @@ class AllocationExperiment(Experiment):
                 return family_id
 
     def add_feature(self, name, function):
-        self.features[name] = function
+        registered_features_of_alloct_matrix[name] = function
 
     def compute_feature(self, feature_id: str = None, feature_params=None,
                        printing=False, **kwargs) -> dict:
@@ -349,12 +334,12 @@ class AllocationExperiment(Experiment):
 
         feature_dict = {'value': {}}
 
-        for instance_id in self.instances:
+        for instance_id in tqdm(self.instances):
             if printing:
                 print(instance_id)
             instance = self.instances[instance_id]
 
-            value = self.features[feature_id](instance)
+            value = registered_features_of_alloct_matrix[feature_id](instance)
 
             feature_dict['value'][instance_id] = value
 
@@ -365,3 +350,81 @@ class AllocationExperiment(Experiment):
         self.features[feature_id] = feature_dict
         return feature_dict
 
+    def print_correlation_between_features(self,
+                                           feature_id_1=None,
+                                           feature_id_2=None,
+                                           title=None, all=False, my_list=None,
+                                           s=12, alpha=0.25, color='purple',
+                                           title_size=24, label_size=20, ticks_size=10,
+                                           saveas=None):
+
+        all_features = {}
+
+        all_features[feature_id_1] = self.import_feature(feature_id=feature_id_1)
+        all_features[feature_id_2] = self.import_feature(feature_id=feature_id_2)
+
+        names = list(all_features.keys())
+
+        nice = {
+            'spearman': 'Spearman',
+            'l1-mutual_attraction': '$\ell_1$ Mutual Attraction',
+            'hamming': "Hamming",
+            "jaccard": "Jaccard",
+            'discrete': 'Discrete',
+            'swap': 'Swap',
+            'emd-bordawise': "EMD-Bordawise",
+            'emd-positionwise': 'EMD-Positionwise',
+            'l1-positionwise': "$\ell_1$-Positionwise",
+            'l1-pairwise': "$\ell_1$-Pairwise",
+        }
+
+        def normalize(name):
+            return {
+                'spearman': 1.,
+                'l1-mutual_attraction': 1.,
+                'emd-positionwise': 1.,
+            }.get(name)
+
+        for name_1, name_2 in itertools.combinations(names, 2):
+
+            values_x = []
+            values_y = []
+            for e1 in all_features[name_1]:
+
+                values_x.append(all_features[name_1][e1])
+                values_y.append(all_features[name_2][e1])
+
+            fig = plt.figure(figsize=[6.4, 4.8])
+            plt.gcf().subplots_adjust(left=0.2)
+            plt.gcf().subplots_adjust(bottom=0.2)
+            ax = fig.add_subplot()
+            ax.scatter(values_x, values_y, s=s, alpha=alpha, color=color)
+
+            PCC = round(stats.pearsonr(values_x, values_y)[0], 3)
+            print('PCC', PCC)
+
+
+            plt.xlim(left=0)
+            plt.ylim(bottom=0)
+
+            plt.xticks(fontsize=ticks_size)
+            plt.yticks(fontsize=ticks_size)
+
+            plt.xlabel(nice.get(name_1, name_1), size=label_size)
+            plt.ylabel(nice.get(name_2, name_2), size=label_size)
+
+            if title:
+                plt.title(title, size=title_size)
+
+            plt.axis('equal')
+
+            path = f'images/correlation'
+            is_exist = os.path.exists(path)
+
+            if not is_exist:
+                os.makedirs(path)
+
+            if saveas is None:
+                saveas = f'corr_{name_1}_{name_2}'
+            plt.savefig(f'images/correlation/{saveas}', pad_inches=1)
+            plt.show()

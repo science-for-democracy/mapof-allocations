@@ -1,6 +1,5 @@
 import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
-import itertools
 import numpy as np
 
 import mapel.core.matchings as matchings
@@ -19,15 +18,11 @@ def get_matching_cost_table(left_task, right_task):
     vectors_1 = convert_to_vectors(left_task)
     vectors_2 = convert_to_vectors(right_task)
     size = left_task.resources_count
-    return [[inner_distances.emd(vectors_1[i], vectors_2[j]) for i in range(size)] for j in range(size)]
+    return [[inner_distances.l1(vectors_1[i], vectors_2[j]) for i in range(size)] for j in range(size)]
 
 
 def convert_to_vectors(task):
-    precision = 100
-    vectors = np.zeros([task.resources_count, precision+1])
-
+    vectors = np.zeros([task.resources_count, task.agents_count])
     for i in range(task.agents_count):
-        for j in range(task.resources_count):
-            vectors[j][int(task.utility_matrix[i][j]*precision)] += 1
-    vectors /= precision
+        vectors[i] = sorted(task.utility_matrix[i])
     return vectors

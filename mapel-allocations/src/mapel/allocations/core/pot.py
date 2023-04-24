@@ -7,6 +7,8 @@ import mapel.allocations.cultures.misc as misc
 import mapel.allocations.cultures.converter as converter
 import mapel.allocations.cultures.paths as paths
 
+import mapel.allocations.features.basic_features as features
+
 registered_cultures_of_alloct_matrix = {
     "contention": basic.contention_alloct_matrix,
     "indifference": basic.indifference_alloct_matrix,
@@ -20,6 +22,12 @@ registered_cultures_of_alloct_matrix = {
     'unsep': paths.get_unsep_path_utility_matrix,
     "dirichlet_shift": basic.dirichlet_shift_matrix,
     "blurred_separability": basic.blurred_separability_alloct_matrix
+}
+
+registered_features_of_alloct_matrix = {
+    'pickiness': features.pickiness,
+    'diversity_of_demand': features.diversity_of_demand,
+    'diversity_of_votes': features.diversity_of_votes,
 }
 
 
