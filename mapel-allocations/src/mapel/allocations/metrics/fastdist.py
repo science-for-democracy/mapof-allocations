@@ -23,6 +23,8 @@ def get_matching_cost_table(left_task, right_task):
 
 def convert_to_vectors(task):
     vectors = np.zeros([task.resources_count, task.agents_count])
+    utility_matrix = np.array(task.utility_matrix)
     for i in range(task.agents_count):
-        vectors[i] = sorted(task.utility_matrix[i])
+        vectors[i] = sorted(utility_matrix[:, i])
     return vectors
+

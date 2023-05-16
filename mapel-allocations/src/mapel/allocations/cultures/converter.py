@@ -79,8 +79,8 @@ def n_square_sum(n):
 def n_cube_sum(n):
     return sum([(i) ** 3 for i in range(n)])
 
+
 def get_func_from_str(func, n):
-    print(func, n)
 
     if func == 'linear':
         vector = [i / n_linear_sum(n) for i in range(n)]
