@@ -3,6 +3,8 @@ import mapel.core.logs as logs
 logger = logs.get_logger(__name__)
 
 import mapel.allocations.cultures.basic_cultures as basic
+import mapel.allocations.cultures.euclidean as euc
+
 import mapel.allocations.cultures.misc as misc
 import mapel.allocations.cultures.converter as converter
 import mapel.allocations.cultures.paths as paths
@@ -21,7 +23,8 @@ registered_cultures_of_alloct_matrix = {
     'idsep': paths.get_idsep_path_utility_matrix,
     'unsep': paths.get_unsep_path_utility_matrix,
     "dirichlet_shift": basic.dirichlet_shift_matrix,
-    "blurred_separability": basic.blurred_separability_alloct_matrix
+    "blurred_separability": basic.blurred_separability_alloct_matrix,
+    "attributes": euc.attributes_alloc_matrix,
 }
 
 registered_features_of_alloct_matrix = {
@@ -34,8 +37,11 @@ registered_features_of_alloct_matrix = {
 def get_matr_for_culture(culture_id: str,
                          agents_count: int,
                          resources_count: int,
-                         params: dict = {}):
+                         params: dict = None):
     # TODO: consider the params argument; do we want to use **kwargs instead?
+    if params is None:
+        params = {}
+
     logger.debug(f'Getting: {culture_id}')
     if generator := registered_cultures_of_alloct_matrix.get(culture_id, None):
         return generator(agents_count, resources_count, **params)
