@@ -10,6 +10,7 @@ import mapel.allocations.cultures.converter as converter
 import mapel.allocations.cultures.paths as paths
 
 import mapel.allocations.features.basic_features as features
+import mapel.allocations.features.or_tools_features.wrapper as or_features
 
 registered_cultures_of_alloct_matrix = {
     "contention": basic.contention_alloct_matrix,
@@ -31,6 +32,22 @@ registered_features_of_alloct_matrix = {
     'pickiness': features.pickiness,
     'diversity_of_demand': features.diversity_of_demand,
     'diversity_of_votes': features.diversity_of_votes,
+    "ex_envy_free": or_features.exists_envy_free,
+    "ex_envy_free_time": or_features.exists_envy_free_time,
+    "abs_envy": or_features.min_max_abs_envy,
+    "abs_envy_time": or_features.min_max_abs_envy_time,
+    "rel_envy": or_features.relative_envy,
+    "rel_envy_time": or_features.relative_envy_time,
+    "nash": or_features.nash,
+    "nash_time": or_features.nash_time,
+    "ex_envy_pareto": or_features.exists_envy_free_pareto,
+    "ex_envy_pareto_time": or_features.exists_envy_free_pareto_time,
+    "ex_mms": or_features.exists_mms,
+    "ex_mms_time": or_features.exists_mms_time,
+    "price_of_envy_free": or_features.price_of_envy_freeness,
+    "price_of_envy_free_time": or_features.price_of_envy_freeness_time,
+    "price_of_envy_pareto": or_features.price_of_envy_pareto,
+    "price_of_envy_pareto_time": or_features.price_of_envy_pareto_time,
 }
 
 
