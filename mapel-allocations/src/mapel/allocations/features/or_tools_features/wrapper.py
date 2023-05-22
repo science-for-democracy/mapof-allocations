@@ -80,7 +80,7 @@ def relative_envy(instance):
     if frac is not None:
         return float(frac)
     # TODO Potentially adjust
-    return 1.2
+    return 400
 
 
 # Returns the runtime of searching the minimal maximal relative envy for 'instance'.
