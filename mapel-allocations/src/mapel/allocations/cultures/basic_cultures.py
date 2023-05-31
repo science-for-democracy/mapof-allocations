@@ -5,7 +5,7 @@ from fractions import Fraction
 
 from numpy.random import default_rng
 
-import mapel.core.logs as logs
+import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational
 

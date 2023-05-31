@@ -32,6 +32,3 @@ def _weighted_l1(a1, a2, w):
     for i in range(len(a1)):
         total += abs(a1[i]-a2[i])*w[i]
     return total
-
-
-# def _normalize(utility_matrix):

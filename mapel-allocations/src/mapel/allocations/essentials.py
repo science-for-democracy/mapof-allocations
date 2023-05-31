@@ -3,7 +3,7 @@ import csv
 import time
 import copy
 
-import mapel.core.logs as logs
+import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 
 import mapel.core.utils as utils
