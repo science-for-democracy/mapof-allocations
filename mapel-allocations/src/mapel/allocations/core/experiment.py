@@ -32,9 +32,10 @@ class AllocationExperiment(Experiment):
         return experiment
 
     def __init__(self, experiment_id, **kwargs):
-        self.all_exps_location = os.path.join(os.getcwd(), "experiments")
-        self.exp_location = os.path.join(self.all_exps_location, experiment_id)
-        self.map_csv_path = os.path.join(self.exp_location, "map.csv")
+        if experiment_id:
+          self.all_exps_location = os.path.join(os.getcwd(), "experiments")
+          self.exp_location = os.path.join(self.all_exps_location, experiment_id)
+          self.map_csv_path = os.path.join(self.exp_location, "map.csv")
         super().__init__(experiment_id=experiment_id, **kwargs)
 
     def create_structure(self) -> None:

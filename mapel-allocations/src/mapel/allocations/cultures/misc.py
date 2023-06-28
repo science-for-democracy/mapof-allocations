@@ -1,5 +1,3 @@
-from fractions import Fraction
-
 import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational

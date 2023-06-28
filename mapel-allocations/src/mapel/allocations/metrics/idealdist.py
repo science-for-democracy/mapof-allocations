@@ -37,3 +37,60 @@ def _validate(left_task, right_task):
   if left_task.resources_count != right_task.resources_count:
     raise ValueError("Cannot compute distance between two tasks with different "
     "counts of resources")
+
+def ideal_distance_ilp(left_task, right_task, *args, **kwargs):
+  logger.debug("Computing single ideal distance via ILP")
+  import gurobipy as gp
+  import itertools as it
+
+  def ell_one_of_matchings(k, l, p, q):
+    left_val = left_task[k][p]
+    right_val = right_task[l][q]
+    return abs(left_val - right_val)
+
+  def get_matchings_quadruples():
+    return it.product(range(ags_count), range(ags_count), range(res_count),
+              range(res_count))
+
+  res_count = left_task.resources_count
+  ags_count = left_task.agents_count
+
+  model = gp.Model("ILP distance")
+
+  rmatch = model.addMVar((res_count, res_count), vtype=gp.GRB.BINARY,
+  name="rmatch")
+  amatch = model.addMVar((ags_count, ags_count), vtype=gp.GRB.BINARY, name="amatch")
+
+  #enforce matching of resources and candidates
+  model.addConstrs((gp.quicksum(rmatch[x,:]) == 1 for x in range(res_count)))
+  model.addConstrs((gp.quicksum(rmatch[:,x]) == 1 for x in range(res_count)))
+  model.addConstrs((gp.quicksum(amatch[x,:]) == 1 for x in range(ags_count)))
+  model.addConstrs((gp.quicksum(amatch[:,x]) == 1 for x in range(ags_count)))
+
+
+  summands = model.addMVar((ags_count, ags_count, res_count, res_count),
+                           vtype=gp.GRB.BINARY, name = "summands")
+
+  #enforcing that summand is one only if the respective matchings are one
+  for (k, l, p, q) in get_matchings_quadruples():
+    model.addGenConstrAnd(summands[k, l, p, q], [amatch[k,l], rmatch[p, q]])
+
+  #objective func
+  model.setObjective(gp.quicksum(
+    (summands[k, l, p, q] * ell_one_of_matchings(k, l, p, q)
+    for (k, l, p, q) in get_matchings_quadruples())),
+    gp.GRB.MINIMIZE)
+
+  model.optimize()
+
+#  for var in model.getVars():
+#    if (var.X >= 1):
+#      print(var.VarName)
+#      print(var.X)
+
+  obj = model.getObjective()
+  return obj.getValue(), None
+
+
+
+

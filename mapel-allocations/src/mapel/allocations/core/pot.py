@@ -12,12 +12,16 @@ import mapel.allocations.cultures.paths as paths
 import mapel.allocations.features.basic_features as features
 import mapel.allocations.features.or_tools_features.wrapper as or_features
 
+import mapel.allocations.core.alloctasklibrarian as librarian
+
 registered_cultures_of_alloct_matrix = {
     "contention": basic.contention_alloct_matrix,
     "indifference": basic.indifference_alloct_matrix,
     "separability": basic.separability_alloct_matrix,
     "dirichlet": basic.dirichlet_matrix,
     "from_spliddit": misc.from_spliddit_file_matrix,
+    "from_mapel_instance":
+    librarian.AllocationTaskLibrarian.read_utility_matrix,
     'ordinal': converter.ordinal,
     'approval': converter.approval,
     'idun': paths.get_idun_path_utility_matrix,
