@@ -415,7 +415,7 @@ def envy_and_pareto(
         if sol is None:
             return sol, res, iterations
         if verbose:
-            values = c_data.get_welfares(sol)
+            values = c_data.get_bundle_vals(sol)
             print(f"{Fore.BLUE}{sol} {res} {values} → {sum(values)}{Fore.RESET}")
 
         solp, resp, _ = pareto_dominating_or_tools(c_data, sol, goal, verbose, milp)
@@ -511,11 +511,11 @@ def rel_envy_alpha_or_tools(
 # "factor" determines the accuracy of alpha: Internally, alpha*factor is determined using only integers.
 # If 'milp' is set to True, pywraplp is used, otherwise CP-SAT is used.
 # 'milp' has to be set to True if 'data.utilities' is of type list[list[float]].
-# The function returns the determined alpha as a Fraction and the corresponding allocation.
+# The function returns the determined alpha as a Fraction, the status, and the corresponding allocation.
 def rel_envy(
     data: FeatureData, factor: int, verbose: bool = False, milp: bool = False
-) -> tuple[Fraction | None, Solution | None]:
-    get_sol = lambda a: rel_envy_alpha_or_tools(data, a, factor, verbose, milp)[0]
+) -> tuple[Fraction | None, str, Solution | None]:
+    get_sol = lambda a: rel_envy_alpha_or_tools(data, a, factor, verbose, milp)[:2]
 
     max_alpha = (max(sum(i for i in p if i > 0) for p in data.utilities) + 1) * factor
     if verbose:
@@ -523,23 +523,120 @@ def rel_envy(
 
     lb = 0
     ub = 1
-    last_sol = get_sol(ub)
+    last_sol, last_stat = get_sol(ub)
+    if last_stat == "MODEL_INVALID":
+        return None, last_stat, None
     while last_sol is None:
         lb = ub
         ub *= 2
         if ub > max_alpha:
-            return None, None
-        last_sol = get_sol(ub)
+            return None, last_stat, None
+        last_sol, last_stat = get_sol(ub)
     if verbose:
         print(f"After first phase: [{lb}, {ub}]")
 
     while lb + 1 != ub:
         mid = (lb + ub) // 2
-        last_sol = get_sol(mid)
+        last_sol, last_stat = get_sol(mid)
+        if last_stat == "MODEL_INVALID":
+            return None, last_stat, None
         if last_sol is None:
             lb = mid
         else:
             ub = mid
 
-    last_sol = get_sol(ub)
-    return Fraction(ub, factor), last_sol
+    last_sol, last_stat = get_sol(ub)
+    return Fraction(ub, factor), last_stat, last_sol
+
+
+# The function returns an allocation for the instance described by "data" with minimal sum of the maximal absolute envies.
+# If 'milp' is set to True, pywraplp is used, otherwise CP-SAT is used.
+# 'milp' has to be set to True if 'data.utilities' is of type list[list[float]].
+# The function returns a tuple consisting of
+# - the solution (i.e. allocation) if one has been determined and otherwise None
+# - the status (i.e. whether the found solution is optimal, feasible, or the model is infeasible or invalid)
+# - the value of the objecive function if an allocation has been determined
+def sum_abs_envs_or_tools(
+    data: FeatureData,
+    verbose: bool = False,
+    milp: bool = False,
+) -> tuple[Solution | None, str, float | None]:
+    if milp:
+        model = pywraplp.Solver.CreateSolver("SCIP")
+    else:
+        model: cp_model.CpModel = cp_model.CpModel()
+
+    utils = data.utilities
+    agents = range(len(utils))
+    items = range(len(utils[0]))
+
+    # The variables
+    # Agent 'i' has item 'j' assigned to it
+    if milp:
+        is_assigned = {
+            (agent, item): model.BoolVar(f"ass_({agent},{item}")  # type: ignore
+            for agent in agents
+            for item in items
+        }
+    else:
+        is_assigned = {
+            (agent, item): model.NewBoolVar(f"ass_({agent},{item}")
+            for agent in agents
+            for item in items
+        }
+
+    # Each item is assigned to exactly one agent
+    for i in items:
+        model.Add(sum(is_assigned[a, i] for a in agents) == 1)
+
+    # Upper bound of the absoluty envy for each pair of agents
+    max_val = max([sum(i) for i in data.utilities])
+    if milp:
+        abs_envy_ag = {
+            agent: model.IntVar(-max_val, max_val, f"abs_env_{agent}")  # type: ignore
+            for agent in agents
+        }
+
+    else:
+        abs_envy_ag = {
+            agent: model.NewIntVar(-max_val, max_val, f"abs_env_{agent}")  # type: ignore
+            for agent in agents
+        }
+
+    # Define abs_env_ag
+    for a1 in agents:
+        for a2 in agents:
+            model.Add(
+                (
+                    sum(is_assigned[a2, i] * data.utilities[a1][i] for i in items)
+                    - sum(is_assigned[a1, i] * data.utilities[a1][i] for i in items)
+                )
+                <= abs_envy_ag[a1]
+            )
+
+    # Objective function
+    model.Minimize(sum(abs_envy_ag[a] for a in agents))
+
+    if milp:
+        status = model.Solve()  # type: ignore
+        if verbose:
+            print(f"Problem solved in {model.wall_time()/1000} seconds.")  # type: ignore
+        status_str = get_status_str_pywraplp(status)
+    else:
+        solver = cp_model.CpSolver()
+        solver.parameters.cp_model_presolve = True
+        status = solver.Solve(model)
+        status_str = get_status_str_cp_sat(status)
+
+    if status_str in ["OPTIMAL", "FEASIBLE"]:
+        if milp:
+            sol = [[is_assigned[a, i].solution_value() for i in items] for a in agents]  # type: ignore
+            obj = model.Objective().Value()  # type: ignore
+        else:
+            sol = [[solver.BooleanValue(is_assigned[a, i]) for i in items] for a in agents]  # type: ignore
+            obj = solver.ObjectiveValue()  # type: ignore
+        if verbose:
+            print(f"{obj}")
+        return sol, status_str, obj
+    else:
+        return None, status_str, None

@@ -19,7 +19,7 @@ class FeatureData:
     def items(self) -> list[str]:
         return [f"Item {i}" for i in range(1, len(self.utilities[0]) + 1)]
 
-    def get_max_abs_envy(self, sol: Solution):
+    def get_max_abs_envies(self, sol: Solution) -> list[float]:
         abs_envies: list[float] = []
         for ag_idx, ag_utils in enumerate(self.utilities):
             own_bundle = 0
@@ -35,7 +35,15 @@ class FeatureData:
                     other_bundle += float(u) * int(sol[oag_idx][item_idx])
                 v_envies.append(other_bundle - own_bundle)
             abs_envies.append(max(v_envies))
+        return abs_envies
+
+    def get_max_abs_envy(self, sol: Solution):
+        abs_envies = self.get_max_abs_envies(sol)
         return max(abs_envies)
+
+    def get_sum_max_abs_envies(self, sol: Solution):
+        abs_envies = self.get_max_abs_envies(sol)
+        return sum(abs_envies)
 
     def get_nash_welfare(self, sol: Solution):
         res = 1
@@ -46,8 +54,11 @@ class FeatureData:
             res *= own_bundle
         return res
 
-    def get_welfares(self, sol: Solution) -> list[float]:
+    def get_bundle_vals(self, sol: Solution) -> list[float]:
         return [
-            sum(self.utilities[i][j] * int(sol[i][j]) for j in range(len(self.items)))
+            sum(
+                float(self.utilities[i][j]) * int(sol[i][j])
+                for j in range(len(self.items))
+            )
             for i in range(len(self.agents))
         ]

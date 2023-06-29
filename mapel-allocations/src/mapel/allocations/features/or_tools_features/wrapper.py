@@ -1,6 +1,13 @@
 from fractions import Fraction
 
-from .envy_features import Goal, Solution, envy_and_pareto, envy_free_or_tools, rel_envy
+from .envy_features import (
+    Goal,
+    Solution,
+    envy_and_pareto,
+    envy_free_or_tools,
+    rel_envy,
+    sum_abs_envs_or_tools,
+)
 from .feature_data import FeatureData
 from .helpers import (
     Timer,
@@ -18,18 +25,25 @@ def envy_free_helper(
     instance, goal: Goal | None = None
 ) -> tuple[Solution | None, str, float | None, float]:
     umatrix = instance.utility_matrix
-    try:
-        utils_ints = get_int_utility_matrix(umatrix)
-        data = FeatureData(utils_ints)
+    utils_ints = get_int_utility_matrix(umatrix)
+    data_ints = FeatureData(utils_ints)
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
         with Timer() as t:
-            sol, status, obj = envy_free_or_tools(data, goal)
+            sol, status, obj = envy_free_or_tools(
+                FeatureData(utils_floats), goal, milp=True
+            )
+        return sol, status, obj, t.time
+
+    try:
+        with Timer() as t:
+            sol, status, obj = envy_free_or_tools(data_ints, goal)
+        if status == "MODEL_INVALID":
+            return do_if_int_not_poss()
         return sol, status, obj, t.time
     except:
-        utils_floats = get_float_utility_matrix(umatrix)
-        data = FeatureData(utils_floats)
-        with Timer() as t:
-            sol, status, obj = envy_free_or_tools(data, goal, milp=True)
-        return sol, status, obj, t.time
+        return do_if_int_not_poss()
 
 
 # Returns 1.0 if an envy-free allocation exists for 'instance', otherwise 0.0.
@@ -62,16 +76,24 @@ def min_max_abs_envy_time(instance):
 # Helper for finding the minimal maximal relative envy for 'instance'.
 def rel_envy_helper(instance) -> tuple[Fraction | None, Solution | None, float]:
     umatrix = instance.utility_matrix
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        with Timer() as t:
+            rel_envy_frac, _, rel_sol = rel_envy(
+                FeatureData(utils_floats), 10, milp=True
+            )
+        return rel_envy_frac, rel_sol, t.time
+
     try:
         utils_ints = get_int_utility_matrix(umatrix)
         with Timer() as t:
-            rel_envy_frac, sol = rel_envy(FeatureData(utils_ints), 10)
+            rel_envy_frac, status, sol = rel_envy(FeatureData(utils_ints), 10)
+        if status == "MODEL_INVALID":
+            return do_if_int_not_poss()
         return rel_envy_frac, sol, t.time
     except:
-        utils_floats = get_float_utility_matrix(umatrix)
-        with Timer() as t:
-            rel_envy_frac, rel_sol = rel_envy(FeatureData(utils_floats), 10, milp=True)
-        return rel_envy_frac, rel_sol, t.time
+        return do_if_int_not_poss()
 
 
 # Returns the minimal maximal relative envy for 'instance' if it is defined, otherwise 1.2.
@@ -129,18 +151,25 @@ def envy_pareto_helper(
     instance,
 ) -> tuple[Solution | None, str, float | None, float]:
     umatrix = instance.utility_matrix
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        with Timer() as t:
+            sol, stat, obj = envy_and_pareto(
+                FeatureData(utils_floats), goal=Goal.SOCIAL_WEL, milp=True
+            )
+        return sol, stat, obj, t.time
+
     try:
         utils_ints = get_int_utility_matrix(umatrix)
         data = FeatureData(utils_ints)
         with Timer() as t:
             sol, stat, obj = envy_and_pareto(data, goal=Goal.SOCIAL_WEL)
+        if stat == "MODEL_INVALID":
+            return do_if_int_not_poss()
         return sol, stat, obj, t.time
     except:
-        utils_floats = get_float_utility_matrix(umatrix)
-        data = FeatureData(utils_floats)
-        with Timer() as t:
-            sol, stat, obj = envy_and_pareto(data, goal=Goal.SOCIAL_WEL, milp=True)
-        return sol, stat, obj, t.time
+        return do_if_int_not_poss()
 
 
 # Returns 1.0 if an envy-free and pareto optimal allocation exists for 'instance',
@@ -161,18 +190,23 @@ def exists_envy_free_pareto_time(instance):
 # Helper for finding MMS-fair allocations for "instance".
 def mms_helper(instance) -> tuple[Solution | None, str, list[int | None], float]:
     umatrix = instance.utility_matrix
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        with Timer() as t:
+            sol, status, obj = get_mms_fair(FeatureData(utils_floats), milp=True)
+        return sol, status, obj, t.time
+
     try:
         utils_ints = get_int_utility_matrix(umatrix)
         data = FeatureData(utils_ints)
         with Timer() as t:
             sol, status, obj = get_mms_fair(data)
+        if status == "MODEL_INVALID":
+            return do_if_int_not_poss()
         return sol, status, obj, t.time
     except:
-        utils_floats = get_float_utility_matrix(umatrix)
-        data = FeatureData(utils_floats)
-        with Timer() as t:
-            sol, status, obj = get_mms_fair(data, milp=True)
-        return sol, status, obj, t.time
+        return do_if_int_not_poss()
 
 
 # Returns 1.0 if an MMS-fair allocation exists for 'instance',
@@ -195,19 +229,27 @@ def exists_mms_time(instance):
 # (2) the maximum social welfare.
 def price_of_envy_freeness_helper(instance) -> tuple[float, float]:
     umatrix = instance.utility_matrix
-    utils_ints = get_int_utility_matrix(umatrix)
-    data_ints = FeatureData(utils_ints)
-    utils_floats = get_float_utility_matrix(umatrix)
-    data_floats = FeatureData(utils_floats)
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        data_floats = FeatureData(utils_floats)
+        sol_env, _, obj_env = envy_free_or_tools(
+            data_floats, Goal.SOCIAL_WEL, milp=True
+        )
+        sol_soc, _, obj_soc = max_social_welfare(data_floats, milp=True)
+        return sol_env, obj_env, sol_soc, obj_soc
+
     with Timer() as t:
         try:
-            sol_env, _, obj_env = envy_free_or_tools(data_ints, Goal.SOCIAL_WEL)
-            sol_soc, _, obj_soc = max_social_welfare(data_ints)
+            utils_ints = get_int_utility_matrix(umatrix)
+            data_ints = FeatureData(utils_ints)
+            sol_env, stat1, obj_env = envy_free_or_tools(data_ints, Goal.SOCIAL_WEL)
+            sol_soc, stat2, obj_soc = max_social_welfare(data_ints)
+            if stat1 == "MODEL_INVALID" or stat2 == "MODEL_INVALID":
+                sol_env, obj_env, sol_soc, obj_soc = do_if_int_not_poss()
         except:
-            sol_env, _, obj_env = envy_free_or_tools(
-                data_floats, Goal.SOCIAL_WEL, milp=True
-            )
-            sol_soc, _, obj_soc = max_social_welfare(data_floats, milp=True)
+            sol_env, obj_env, sol_soc, obj_soc = do_if_int_not_poss()
+
     assert sol_soc is not None and obj_soc is not None
 
     if sol_env is None:
@@ -235,22 +277,28 @@ def price_of_envy_freeness_time(instance):
 #     pareto optimal allocation (or 0 if there is none) and
 # (2) the maximum social welfare.
 def price_of_envy_pareto_helper(instance) -> tuple[float, float]:
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        data_floats = FeatureData(utils_floats)
+        sol_env_par, _, obj_env_par = envy_and_pareto(
+            data_floats, goal=Goal.SOCIAL_WEL, milp=True
+        )
+        sol_soc, _, obj_soc = max_social_welfare(data_floats, milp=True)
+        return sol_env_par, obj_env_par, sol_soc, obj_soc
+
     umatrix = instance.utility_matrix
     utils_ints = get_int_utility_matrix(umatrix)
     data_ints = FeatureData(utils_ints)
-    utils_floats = get_float_utility_matrix(umatrix)
-    data_floats = FeatureData(utils_floats)
     with Timer() as t:
         try:
-            sol_env_par, _, obj_env_par = envy_and_pareto(
+            sol_env_par, stat1, obj_env_par = envy_and_pareto(
                 data_ints, goal=Goal.SOCIAL_WEL
             )
-            sol_soc, _, obj_soc = max_social_welfare(data_ints)
+            sol_soc, stat2, obj_soc = max_social_welfare(data_ints)
+            if stat1 == "MODEL_INVALID" or stat2 == "MODEL_INVALID":
+                sol_env_par, obj_env_par, sol_soc, obj_soc = do_if_int_not_poss()
         except:
-            sol_env_par, _, obj_env_par = envy_and_pareto(
-                data_floats, goal=Goal.SOCIAL_WEL, milp=True
-            )
-            sol_soc, _, obj_soc = max_social_welfare(data_floats, milp=True)
+            sol_env_par, obj_env_par, sol_soc, obj_soc = do_if_int_not_poss()
 
     assert sol_soc is not None and obj_soc is not None
     if sol_env_par is None:
@@ -274,3 +322,83 @@ def price_of_envy_pareto(instance):
 # (2) the maximum social welfare.
 def price_of_envy_pareto_time(instance):
     return price_of_envy_pareto_helper(instance)[1]
+
+
+# Helper for finding an allocation with maximal utilitarian social welfare.
+def max_social_wels_helper(instance) -> tuple[list[float], float]:
+    umatrix = instance.utility_matrix
+    utils_ints = get_int_utility_matrix(umatrix)
+    data_ints = FeatureData(utils_ints)
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        data_floats = FeatureData(utils_floats)
+        sol_soc, _, obj_soc = max_social_welfare(data_floats, milp=True)
+        return sol_soc, obj_soc
+
+    with Timer() as t:
+        try:
+            sol_soc, stat, obj_soc = max_social_welfare(data_ints)
+            if stat == "MODEL_INVALID":
+                sol_soc, obj_soc = do_if_int_not_poss()
+
+        except:
+            sol_soc, obj_soc = do_if_int_not_poss()
+
+    assert sol_soc is not None and obj_soc is not None
+    return FeatureData(umatrix).get_bundle_vals(sol_soc), t.time
+
+
+# Returns the maximal utilitarian social welfare for 'instance'.
+def max_social_wel(instance) -> float:
+    wels, _ = max_social_wels_helper(instance)
+    return sum(wels)
+
+
+# Returns the runtime for finding the maximal utilitarian social welfare for 'instance'.
+def max_social_wel_time(instance) -> float:
+    _, t = max_social_wels_helper(instance)
+    return t
+
+
+# Returns the maximal utilitarian social welfare divided by the number of agents.
+def max_social_wel_scaled(instance) -> float:
+    sum_welfares = max_social_wel(instance)
+    return sum_welfares / instance.agents_count
+
+
+# Helper for finding the minimal sum of the maximal absolute envies.
+def sum_abs_helper(instance) -> tuple[Solution | None, str, float | None, float]:
+    umatrix = instance.utility_matrix
+    utils_ints = get_int_utility_matrix(umatrix)
+    data = FeatureData(utils_ints)
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        with Timer() as t:
+            sol, status, obj = sum_abs_envs_or_tools(
+                FeatureData(utils_floats), milp=True
+            )
+        return sol, status, obj, t.time
+
+    try:
+        with Timer() as t:
+            sol, status, obj = sum_abs_envs_or_tools(data)
+        if status == "MODEL_INVALID":
+            return do_if_int_not_poss()
+        return sol, status, obj, t.time
+    except:
+        return do_if_int_not_poss()
+
+
+# Returns the minimal sum of the maximal absolute envies for 'instance'.
+def min_sum_max_abs_envy(instance):
+    res, _, _, _ = sum_abs_helper(instance)
+    assert res is not None
+    return FeatureData(instance.utility_matrix).get_sum_max_abs_envies(res)
+
+
+# Returns the runtime for finding the minimal sum of the maximal absolute envies for 'instance'.
+def min_sum_max_abs_envy_time(instance):
+    _, _, _, t = sum_abs_helper(instance)
+    return t

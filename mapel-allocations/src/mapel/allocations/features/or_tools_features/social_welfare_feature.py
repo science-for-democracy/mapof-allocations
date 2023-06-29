@@ -60,6 +60,8 @@ def max_social_welfare(
     else:
         solver = cp_model.CpSolver()
         solver.parameters.cp_model_presolve = True
+        # solver.parameters.log_search_progress = True
+        # solver.parameters.log_to_stdout = True
         status = solver.Solve(model)
         status_str = get_status_str_cp_sat(status)
     if status_str in ["OPTIMAL", "FEASIBLE"]:
