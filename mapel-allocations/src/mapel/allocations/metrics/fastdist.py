@@ -1,4 +1,4 @@
-import mapel.core.logs as logs
+import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 import numpy as np
 

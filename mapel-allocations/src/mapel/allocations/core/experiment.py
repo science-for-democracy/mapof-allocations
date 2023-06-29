@@ -8,7 +8,8 @@ from matplotlib import pyplot as plt
 from scipy.stats import stats
 from tqdm import tqdm
 
-import mapel.core.logs as logs
+import mapel.allocations.core.logs as logs
+
 logger = logs.get_logger(__name__)
 from mapel.core.objects.Experiment import Experiment
 from mapel.allocations.essentials import AllocationTaskFamily
@@ -21,52 +22,53 @@ from mapel.allocations.core.pot import registered_features_of_alloct_matrix
 class AllocationExperiment(Experiment):
     @classmethod
     def prepare_offline_experiment(cls, experiment_id, **kwargs):
-      experiment = AllocationExperiment(store = True, experiment_id =
-      experiment_id, **kwargs)
-      if experiment.check_if_experiment_exists():
-        logger.warning(f"Experiment {experiment_id} already exists. The "
-        "structure is assumed to be correct")
-      else:
-        experiment.create_structure()
-      return experiment
+        experiment = AllocationExperiment(is_exported=True, experiment_id=
+        experiment_id, **kwargs)
+        if experiment.check_if_experiment_exists():
+            logger.warning(f"Experiment {experiment_id} already exists. The "
+                           "structure is assumed to be correct")
+        else:
+            experiment.create_structure()
+        return experiment
 
     def __init__(self, experiment_id, **kwargs):
-        self.all_exps_location = os.path.join(os.getcwd(), "experiments")
-        self.exp_location = os.path.join(self.all_exps_location, experiment_id)
-        self.map_csv_path = os.path.join(self.exp_location, "map.csv")
-        super().__init__(experiment_id = experiment_id, **kwargs)
+        if experiment_id:
+          self.all_exps_location = os.path.join(os.getcwd(), "experiments")
+          self.exp_location = os.path.join(self.all_exps_location, experiment_id)
+          self.map_csv_path = os.path.join(self.exp_location, "map.csv")
+        super().__init__(experiment_id=experiment_id, **kwargs)
 
     def create_structure(self) -> None:
         logger.debug(f"Experiment's {self.experiment_id} structure created in "
-        f"{self.exp_location}")
-        os.makedirs(self.all_exps_location, exist_ok = True)
-        os.makedirs(self.exp_location, exist_ok = True)
+                     f"{self.exp_location}")
+        os.makedirs(self.all_exps_location, exist_ok=True)
+        os.makedirs(self.exp_location, exist_ok=True)
 
         internal_dirs = [
-          "distances",
-          "features",
-          "coordinates",
-          "instances",
-          "matrices"
+            "distances",
+            "features",
+            "coordinates",
+            "instances",
+            "matrices"
         ]
 
         for internal_dir in internal_dirs:
-          path = os.path.join(self.exp_location, internal_dir)
-          os.makedirs(path, exist_ok = True)
+            path = os.path.join(self.exp_location, internal_dir)
+            os.makedirs(path, exist_ok=True)
 
     def check_if_experiment_exists(self):
-      return os.path.isfile(self.map_csv_path)
+        return os.path.isfile(self.map_csv_path)
 
     def import_controllers(self):
         """ Import controllers from a file """
         families = {}
 
         if not os.path.isfile(self.map_csv_path):
-          raise ValueError(f"{self.map_csv_path} does not exist!")
+            raise ValueError(f"{self.map_csv_path} does not exist!")
         with open(self.map_csv_path, 'r') as file_:
 
             header = [h.strip() for h in file_.readline().split(';')]
-            reader = csv.DictReader(file_, fieldnames=header, delimiter=';')
+            reader = csv.DictReader(filter(lambda row: row[0]!="#", file_), fieldnames=header, delimiter=';')
 
             all_num_candidates = []
             all_num_voters = []
@@ -125,33 +127,33 @@ class AllocationExperiment(Experiment):
                 single = size == 1
 
                 if not label:
-                  label = family_id
+                    label = family_id
 
                 families[family_id] = AllocationTaskFamily.from_culture(culture_id=culture_id,
-                                                     family_id=family_id,
-                                                     params=params, label=label,
-                                                     color=color, alpha=alpha, show=show,
-                                                     size=size, marker=marker,
-                                                     starting_from=starting_from,
-                                                     agents_count =
-                                                     agents_count,
-                                                     resources_count =
-                                                     resources_count,
-                                                     single=single)
+                                                                        family_id=family_id,
+                                                                        params=params, label=label,
+                                                                        color=color, alpha=alpha,
+                                                                        show=show,
+                                                                        size=size, marker=marker,
+                                                                        starting_from=starting_from,
+                                                                        agents_count=
+                                                                        agents_count,
+                                                                        resources_count=
+                                                                        resources_count,
+                                                                        single=single)
                 starting_from += size
 
             #    all_num_candidates.append(num_candidates)
             #    all_num_voters.append(num_voters)
 
-            #check_if_all_equal(all_num_candidates, 'num_candidates')
-            #check_if_all_equal(all_num_voters, 'num_voters')
+            # check_if_all_equal(all_num_candidates, 'num_candidates')
+            # check_if_all_equal(all_num_voters, 'num_voters')
 
             self.num_families = len(families)
             self.num_instances = sum([families[family_id].size for family_id in families])
             self.main_order = [i for i in range(self.num_instances)]
 
         return families
-
 
     def prepare_instances(self, store_points=False, aggregated=True):
 
@@ -165,7 +167,7 @@ class AllocationExperiment(Experiment):
             logger.debug(f'Preparing: {family_id}')
 
             new_instances = self.families[family_id].prepare_family(
-                store=self.store,
+                store=self.is_exported,
                 experiment_id=self.experiment_id,
                 store_points=store_points,
                 aggregated=aggregated)
@@ -177,61 +179,61 @@ class AllocationExperiment(Experiment):
         instances = {}
 
         for family_id in self.families:
-          logger.debug(f"Reading in family: {family_id}")
-          single = self.families[family_id].single
+            logger.debug(f"Reading in family: {family_id}")
+            single = self.families[family_id].single
 
+            ids = []
+            instances_count = self.families[family_id].size
+            # A hack for families of size unknown at the time of wriitn map.csv
+            if instances_count == 0:
+                instances_count = 999999999999
+            for j in range(instances_count):
+                instance_id = get_instance_id(single, family_id, j)
+                logger.debug(f"Reading in instance: {instance_id}")
 
-          ids = []
-          instances_count = self.families[family_id].size
-          # A hack for families of time unknown at the time of wriitn map.csv
-          if instances_count == 0:
-            instances_count = 999999999999
-          for j in range(instances_count):
-              instance_id = get_instance_id(single, family_id, j)
-              logger.debug(f"Reading in instance: {instance_id}")
+                # The hack continued
+                try:
+                    instance = AllocationTask.from_file(instance_id,
+                                                        self.experiment_id)
+                except ValueError:
+                    break
 
-              # The hack continued
-              try:
-                instance = AllocationTask.from_file(instance_id,
-                self.experiment_id)
-              except ValueError:
-                break
+                instances[instance_id] = instance
+                ids.append(str(instance_id))
 
-              instances[instance_id] = instance
-              ids.append(str(instance_id))
-
-          self.families[family_id].election_ids = ids
+            self.families[family_id].election_ids = ids
 
         return instances
-#
-#    def set_default_num_candidates(self, num_candidates: int) -> None:
-#        """ Set default number of candidates """
-#        self.default_num_candidates = num_candidates
-#
-#    def set_default_num_voters(self, num_voters: int) -> None:
-#        """ Set default number of voters """
-#        self.default_num_voters = num_voters
-#
-#    def set_default_committee_size(self, committee_size: int) -> None:
-#        """ Set default size of the committee """
-#        self.default_committee_size = committee_size
 
-#    def add_election(self, culture_id="none", params=None, label=None,
-#                     color="black", alpha=1., show=True, marker='x', starting_from=0, size=1,
-#                     num_candidates=None, num_voters=None, election_id=None):
-#        """ Add election to the experiment """
-#
-#        if num_candidates is None:
-#            num_candidates = self.default_num_candidates
-#
-#        if num_voters is None:
-#            num_voters = self.default_num_voters
-#
-#        return self.add_family(culture_id=culture_id, params=params, size=size, label=label,
-#                               color=color, alpha=alpha, show=show, marker=marker,
-#                               starting_from=starting_from, family_id=election_id,
-#                               num_candidates=num_candidates, num_voters=num_voters,
-#                               single=True)
+    #
+    #    def set_default_num_candidates(self, num_candidates: int) -> None:
+    #        """ Set default number of candidates """
+    #        self.default_num_candidates = num_candidates
+    #
+    #    def set_default_num_voters(self, num_voters: int) -> None:
+    #        """ Set default number of voters """
+    #        self.default_num_voters = num_voters
+    #
+    #    def set_default_committee_size(self, committee_size: int) -> None:
+    #        """ Set default size of the committee """
+    #        self.default_committee_size = committee_size
+
+    #    def add_election(self, culture_id="none", params=None, label=None,
+    #                     color="black", alpha=1., show=True, marker='x', starting_from=0, size=1,
+    #                     num_candidates=None, num_voters=None, election_id=None):
+    #        """ Add election to the experiment """
+    #
+    #        if num_candidates is None:
+    #            num_candidates = self.default_num_candidates
+    #
+    #        if num_voters is None:
+    #            num_voters = self.default_num_voters
+    #
+    #        return self.add_family(culture_id=culture_id, params=params, size=size, label=label,
+    #                               color=color, alpha=alpha, show=show, marker=marker,
+    #                               starting_from=starting_from, family_id=election_id,
+    #                               num_candidates=num_candidates, num_voters=num_voters,
+    #                               single=True)
 
     def add_family(self, culture_id: str = "none", params: dict = None, size: int = 1,
                    label: str = None, color: str = "black", alpha: float = 1.,
@@ -239,17 +241,17 @@ class AllocationExperiment(Experiment):
                    num_candidates: int = None, num_voters: int = None,
                    family_id: str = None, single: bool = False,
                    path: dict = None,
-                   election_id: str = None, 
-                   family = None) -> list:
+                   election_id: str = None,
+                   family=None) -> list:
 
         if family == None:
-          raise NotImplementedError
+            raise NotImplementedError
 
         elif label is None:
             label = family.family_id
 
         if self.families == None:
-          self.families = {}
+            self.families = {}
 
         self.families[family.family_id] = family
         self.num_families = len(self.families)
@@ -263,8 +265,7 @@ class AllocationExperiment(Experiment):
 
         return [alloc_task.instance_id for alloc_task in family.allocation_tasks]
 
-
-    def compute_distances(self, distance_id, self_distances = True):
+    def compute_distances(self, distance_id, self_distances=True):
         matchings = {instance_id: {} for instance_id in self.instances}
         distances = {instance_id: {} for instance_id in self.instances}
         times = {instance_id: {} for instance_id in self.instances}
@@ -274,18 +275,18 @@ class AllocationExperiment(Experiment):
             for j, instance_2 in enumerate(self.instances):
                 if i < j or (i == j and self_distances):
                     ids.append((instance_1, instance_2))
-         
-        from tqdm import tqdm
+
+
         with tqdm(total=len(ids)) as pbar:
-          for left_task_id, right_task_id in ids:
-            st_time = time.time() 
-            distance, matching = \
-            surveying.get_distance(self.instances[left_task_id],
-            self.instances[right_task_id], distance_id) 
-            distances[left_task_id][right_task_id] = distance
-            matchings[left_task_id][right_task_id] = matching
-            times[left_task_id][right_task_id] = time.time() - st_time
-            pbar.update(1)
+            for left_task_id, right_task_id in ids:
+                st_time = time.time()
+                distance, matching = \
+                    surveying.get_distance(self.instances[left_task_id],
+                                           self.instances[right_task_id], distance_id)
+                distances[left_task_id][right_task_id] = distance
+                matchings[left_task_id][right_task_id] = matching
+                times[left_task_id][right_task_id] = time.time() - st_time
+                pbar.update(1)
 
         logger.debug(f"Computed distances:\n{distances}")
 
@@ -293,10 +294,9 @@ class AllocationExperiment(Experiment):
         self.times = times
         self.matchings = matchings
 
-        if self.store:
-          self._store_distances_to_file(distance_id, self.distances, self.times,
-          self_distances )
-
+        if self.is_exported:
+            self._store_distances_to_file(distance_id, self.distances, self.times,
+                                          self_distances)
 
     def _store_distances_to_file(self, distance_id, distances, times, self_distances):
         path_to_folder = os.path.join(os.getcwd(), "experiments", self.experiment_id, "distances")
@@ -326,8 +326,7 @@ class AllocationExperiment(Experiment):
     def add_feature(self, name, function):
         registered_features_of_alloct_matrix[name] = function
 
-    def compute_feature(self, feature_id: str = None, feature_params=None,
-                       printing=False, **kwargs) -> dict:
+    def compute_feature(self, feature_id: str = None, feature_params=None, **kwargs) -> dict:
 
         if feature_params is None:
             feature_params = {}
@@ -335,15 +334,13 @@ class AllocationExperiment(Experiment):
         feature_dict = {'value': {}}
 
         for instance_id in tqdm(self.instances):
-            if printing:
-                print(instance_id)
             instance = self.instances[instance_id]
 
             value = registered_features_of_alloct_matrix[feature_id](instance)
 
             feature_dict['value'][instance_id] = value
 
-        if self.store:
+        if self.is_exported:
             feature_long_id = feature_id
             self.store_feature(feature_dict, saveas=feature_long_id)
 
@@ -390,7 +387,6 @@ class AllocationExperiment(Experiment):
             values_x = []
             values_y = []
             for e1 in all_features[name_1]:
-
                 values_x.append(all_features[name_1][e1])
                 values_y.append(all_features[name_2][e1])
 
@@ -402,7 +398,6 @@ class AllocationExperiment(Experiment):
 
             PCC = round(stats.pearsonr(values_x, values_y)[0], 3)
             print('PCC', PCC)
-
 
             plt.xlim(left=0)
             plt.ylim(bottom=0)

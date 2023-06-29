@@ -3,11 +3,11 @@ import csv
 import time
 import copy
 
-import mapel.core.logs as logs
+import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 
 import mapel.core.utils as utils
-
+import mapel.allocations.cultures.misc as misc
 from mapel.core.objects.Family import Family
 from mapel.allocations.core.alloctask import AllocationTask, AllocationTaskLibrarian
 from mapel.core.utils import get_instance_id
@@ -91,6 +91,37 @@ class AllocationTaskFamily(Family):
           instance_id = get_instance_id(self.single, self.family_id, counter)
           instance = AllocationTask.from_splidditfile(instance_id,
           self.agents_count, self.resources_count, self.culture_id, instance_filename)
+          instances[instance_id] = instance
+          counter += 1
+    elif self.culture_id == "collect_instances":
+      max_instances = self.size
+      basepath = self.params["basepath"]
+      ext = self.params["ext"]
+      logger.debug(f"Collecting spliddit instaces from '{basepath}' ("
+      f"{self.agents_count} agents and {self.resources_count} resources)")
+      counter = 0
+      for root, dirs, files in os.walk(basepath):
+        if root != basepath:
+          continue
+        for filename in files:
+          if counter == max_instances:
+            logger.info(f"Acheived the limit of {max_instances} loaded!")
+            break
+          if not filename.endswith(f".{ext}"):
+            continue
+          logger.info(f"Collecting {filename}")
+          instance_filename  = os.path.join(root, filename)
+          instance_id = get_instance_id(self.single, self.family_id, counter)
+
+          try: 
+            utility_matrix = \
+            misc.from_mapel_allocation_instance(self.agents_count, self.
+                                                resources_count, instance_filename)
+          except ValueError as e:
+            logger.debug(f"File {filename} ommited due to incompatible agents \
+                         and/or resources counts.")
+            continue
+          instance = AllocationTask.from_matrix(utility_matrix, instance_id, self.culture_id)
           instances[instance_id] = instance
           counter += 1
     else:

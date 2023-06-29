@@ -1,9 +1,10 @@
-import mapel.core.logs as logs
+import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 
 from mapel.allocations.metrics import idealdist, rrobin, fastdist
 
 __distances = { 'ideal': idealdist.ideal_distance,
+                'ideal-ilp': idealdist.ideal_distance_ilp,
                 'round-robin': rrobin.rr_distance,
                 'fast': fastdist.fast_distance}
 
