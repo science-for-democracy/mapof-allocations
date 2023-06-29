@@ -35,12 +35,13 @@ def from_spliddit_file_matrix(agents_cnt, resources_cnt, path):
   rational_matrix = float_matrix_to_rational(utility_matrix)
   return rational_matrix
 
-def from_mapel_allocation_instance(agents_cnt, resources_cnt, path):
+def from_mapel_allocation_instance(agents_cnt, resources_cnt, path, ensure_sizes = True):
   """
    Reads in a mapel allocation instance. 
   """
   logger.debug(f"Reading in mapel task allocation file: {path}")
   rational_utility_matrix = librarian.AllocationTaskLibrarian.read_utility_matrix(path)
-  check_agents_and_resources_counts(rational_utility_matrix, agents_cnt,
-                                    resources_cnt)
+  if ensure_sizes:
+    check_agents_and_resources_counts(rational_utility_matrix, agents_cnt,
+                                      resources_cnt)
   return rational_utility_matrix

@@ -15,6 +15,7 @@ from mapel.core.objects.Experiment import Experiment
 from mapel.allocations.essentials import AllocationTaskFamily
 from mapel.allocations.core.alloctask import AllocationTask
 from mapel.core.utils import get_instance_id, make_folder_if_do_not_exist
+from mapel.core.persistence.experiment_exports import export_feature
 import mapel.allocations.metrics.surveying as surveying
 from mapel.allocations.core.pot import registered_features_of_alloct_matrix
 
@@ -342,7 +343,7 @@ class AllocationExperiment(Experiment):
 
         if self.is_exported:
             feature_long_id = feature_id
-            self.store_feature(feature_dict, saveas=feature_long_id)
+            export_feature(self, feature_dict, saveas=feature_long_id)
 
         self.features[feature_id] = feature_dict
         return feature_dict

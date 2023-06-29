@@ -42,8 +42,9 @@ class AllocationTask(Instance):
     @classmethod
     def from_file(cls, instance_id, experiment_id, **kwargs):
         librarian = AllocationTaskLibrarian()
-        return librarian.read(instance_id, os.path.join("experiments",
-                                                        experiment_id, "instances"))
+        path_to_file = os.path.join("experiments", experiment_id, "instances", instance_id + ".alt")
+        utility_matrix = librarian.read(path_to_file)
+        return AllocationTask.from_matrix(utility_matrix, instance_id, None, **kwargs)
 
     def __init__(self, utility_matrix, experiment_id, instance_id,
                  culture_id=None, alpha=None, **kwargs):

@@ -9,7 +9,8 @@ logger = logs.get_logger(__name__)
 import mapel.core.utils as utils
 import mapel.allocations.cultures.misc as misc
 from mapel.core.objects.Family import Family
-from mapel.allocations.core.alloctask import AllocationTask, AllocationTaskLibrarian
+from mapel.allocations.core.alloctask import AllocationTask
+from mapel.allocations.core.alloctasklibrarian import AllocationTaskLibrarian
 from mapel.core.utils import get_instance_id
 
 

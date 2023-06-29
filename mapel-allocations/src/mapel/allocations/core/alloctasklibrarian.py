@@ -4,7 +4,6 @@ from fractions import Fraction
 from mapel.core.utils import make_folder_if_do_not_exist
 import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
-import mapel.allocations.core.alloctask as alloctask
 
 class AllocationTaskLibrarian:
 
@@ -31,14 +30,10 @@ class AllocationTaskLibrarian:
 
         return utility_matrix
         
-    def read(self, instance_id, location):
-        path_to_file = os.path.join(location, instance_id + ".alt")
+    def read(self, path_to_file):
         logger.debug(f"Reading in from file: {path_to_file}")
 
-        utility_matrix = \
-        AllocationTaskLibrarian.read_utility_matrix(path_to_file)
-
-        return alloctask.AllocationTask.from_matrix(utility_matrix, instance_id)
+        return AllocationTaskLibrarian.read_utility_matrix(path_to_file)
 
     def write(self, allocation, location):
         self._prepare_location(location)
