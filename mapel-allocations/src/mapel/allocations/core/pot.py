@@ -50,6 +50,7 @@ registered_features_of_alloct_matrix = {
     "price_of_envy_free_time": or_features.price_of_envy_freeness_time,
     "price_of_envy_pareto": or_features.price_of_envy_pareto,
     "price_of_envy_pareto_time": or_features.price_of_envy_pareto_time,
+    "max_soc_welf_scaled": or_features.max_social_wel_scaled,
 }
 
 
