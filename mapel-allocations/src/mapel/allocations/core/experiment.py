@@ -68,7 +68,7 @@ class AllocationExperiment(Experiment):
         with open(self.map_csv_path, 'r') as file_:
 
             header = [h.strip() for h in file_.readline().split(';')]
-            reader = csv.DictReader(file_, fieldnames=header, delimiter=';')
+            reader = csv.DictReader(filter(lambda row: row[0]!="#", file_), fieldnames=header, delimiter=';')
 
             all_num_candidates = []
             all_num_voters = []
@@ -167,7 +167,7 @@ class AllocationExperiment(Experiment):
             logger.debug(f'Preparing: {family_id}')
 
             new_instances = self.families[family_id].prepare_family(
-                # is_exported=self.is_exported,
+                store=self.is_exported,
                 experiment_id=self.experiment_id,
                 store_points=store_points,
                 aggregated=aggregated)
@@ -184,7 +184,7 @@ class AllocationExperiment(Experiment):
 
             ids = []
             instances_count = self.families[family_id].size
-            # A hack for families of time unknown at the time of wriitn map.csv
+            # A hack for families of size unknown at the time of wriitn map.csv
             if instances_count == 0:
                 instances_count = 999999999999
             for j in range(instances_count):

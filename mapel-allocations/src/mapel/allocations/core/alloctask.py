@@ -1,11 +1,9 @@
 from fractions import Fraction
 import os
-
 import mapel.allocations.core.logs as logs
-
 logger = logs.get_logger(__name__)
 from mapel.core.objects.Instance import Instance
-from mapel.core.utils import make_folder_if_do_not_exist
+from mapel.allocations.core.alloctasklibrarian import AllocationTaskLibrarian
 import mapel.allocations.core.pot as pot
 
 
@@ -16,13 +14,14 @@ class AllocationTask(Instance):
   """
 
     @classmethod
-    def from_matrix(cls, utility_matrix, instance_id):
+    def from_matrix(cls, utility_matrix, instance_id, culture_id = None, **kwargs):
         """
       Constructs an instance from a utility matrix, which is a list of agent
       evaluation functions over all of the resources. Each evaluation function
       is a list of integers.
     """
-        return AllocationTask(utility_matrix, None, instance_id)
+        return AllocationTask(utility_matrix, None, instance_id, culture_id,
+                              *kwargs)
 
     @classmethod
     def from_splidditfile(cls, instance_id, agents_count, resources_count,
@@ -82,52 +81,3 @@ class AllocationTask(Instance):
                                      "int or float")
 
 
-class AllocationTaskLibrarian:
-    def read(self, instance_id, location):
-        path_to_file = os.path.join(location, instance_id + ".alt")
-        logger.debug(f"Reading in from file: {path_to_file}")
-
-        if not os.path.exists(path_to_file):
-            raise ValueError(f"No file: {path_to_file}")
-
-        with open(path_to_file, "r") as ffile:
-            utility_matrix = None
-            line_counter = 0
-            for line in ffile:
-                line = line.strip()
-                if line.startswith("#"):
-                    continue
-                line_counter += 1
-                if line_counter == 1:
-                    agents_cnt, res_cnt = map(int, line.split(" "))
-                    utility_matrix = []
-                elif line != "":
-                    fractions = line.split(" ")
-                    fractions = list(map(Fraction, fractions))
-                    utility_matrix.append(fractions)
-
-        return AllocationTask.from_matrix(utility_matrix, instance_id)
-
-    def write(self, allocation, location):
-        self._prepare_location(location)
-        path_to_file = os.path.join(location, f'{allocation.instance_id}.alt')
-
-        logger.debug(f"Writing allocation task to: {path_to_file}")
-
-        with open(path_to_file, "w") as ffile:
-            agents_cnt = allocation.agents_count
-            res_cnt = allocation.resources_count
-            ffile.write(f"{agents_cnt} {res_cnt}\n")
-            ffile.write("\n")
-            for row in allocation.utility_matrix:
-                for entry in row[:-1]:
-                    ffile.write(f"{entry} ")
-                ffile.write(f"{row[-1]}\n")
-            ffile.write("\n")
-            for row in allocation.utility_matrix:
-                ffile.write("# ")
-                outstr = "\t".join(map(str, [round(float(n), 5) for n in row]))
-                ffile.write(f"{outstr}\n")
-
-    def _prepare_location(self, location):
-        make_folder_if_do_not_exist(location)

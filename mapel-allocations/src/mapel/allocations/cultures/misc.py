@@ -1,6 +1,16 @@
 import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational
+import mapel.allocations.core.alloctasklibrarian as librarian
+
+def check_agents_and_resources_counts(utility_matrix, agents_cnt, resources_cnt):
+  if len(utility_matrix) != agents_cnt:
+    raise ValueError("The collected allocation task does not have "
+    f"{agents_cnt} agents")
+  for agent_utils in utility_matrix:
+    if len(agent_utils) != resources_cnt:
+      raise ValueError(f"At least one of the agents does not report "
+      f"{resources_cnt} utility values.")
 
 def from_spliddit_file_matrix(agents_cnt, resources_cnt, path):
   """
@@ -21,12 +31,16 @@ def from_spliddit_file_matrix(agents_cnt, resources_cnt, path):
       if (linecnt > 2) and (linecnt <= 2 + agnt_cnt):
         utility_matrix.append([int(val) for val in line.strip().split()])
       continue
-  if len(utility_matrix) != agents_cnt:
-    raise ValueError("The collected allocation task does not have "
-    f"{agents_cnt} agents")
-  for agent_utils in utility_matrix:
-    if len(agent_utils) != resources_cnt:
-      raise ValueError(f"At least one of the agents does not report "
-      f"{resources_cnt} utility values.")
+  check_agents_and_resources_counts(utility_matrix, agents_cnt, resources_cnt)
   rational_matrix = float_matrix_to_rational(utility_matrix)
   return rational_matrix
+
+def from_mapel_allocation_instance(agents_cnt, resources_cnt, path):
+  """
+   Reads in a mapel allocation instance. 
+  """
+  logger.debug(f"Reading in mapel task allocation file: {path}")
+  rational_utility_matrix = librarian.AllocationTaskLibrarian.read_utility_matrix(path)
+  check_agents_and_resources_counts(rational_utility_matrix, agents_cnt,
+                                    resources_cnt)
+  return rational_utility_matrix
