@@ -12,7 +12,7 @@ def convert_approval_votes_to_utility_matrix(culture_id=None,
                                              resources_cnt=None,
                                              params=None):
 
-    params, _ = update_params_approval(params, None, culture_id, resources_cnt)
+    params, _ = update_params_approval(params, dict(), None, culture_id, num_candidates = resources_cnt)
 
     approval_votes = generate_approval_votes(culture_id=culture_id,
                                              num_voters=agents_cnt,
@@ -102,7 +102,7 @@ def convert_ordinal_votes_to_utility_matrix__proportional(culture_id=None,
                                                           resources_cnt=None,
                                                           params=None,
                                                           func=None):
-    params, _ = update_params_ordinal(params, None, culture_id, resources_cnt)
+    params, _ = update_params_ordinal(params, dict(), None, culture_id, num_candidates=resources_cnt)
 
     ordinal_votes = generate_ordinal_votes(culture_id=culture_id,
                                            num_voters=agents_cnt,
