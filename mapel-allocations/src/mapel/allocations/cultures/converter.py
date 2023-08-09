@@ -20,7 +20,7 @@ def convert_approval_votes_to_utility_matrix(culture_id=None,
                                              params=params)
 
     # utility_matrix = np.zeros([agents_cnt, resources_cnt])
-    utility_matrix = [[0 for _ in range(resources_cnt)] for _ in range(agents_cnt)]
+    utility_matrix = [[Fraction(0) for _ in range(resources_cnt)] for _ in range(agents_cnt)]
 
     for i, vote in enumerate(approval_votes):
         for candidate in vote:

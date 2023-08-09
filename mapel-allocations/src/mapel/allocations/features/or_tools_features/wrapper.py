@@ -397,6 +397,10 @@ def min_sum_max_abs_envy(instance):
     assert res is not None
     return FeatureData(instance.utility_matrix).get_sum_max_abs_envies(res)
 
+# Returns the minimal sum of the maximal absolute envies divided by the number of agents.
+def min_sum_max_abs_envy_scaled(instance) -> float:
+    sum_mae = min_sum_max_abs_envy(instance)
+    return sum_mae / instance.agents_count
 
 # Returns the runtime for finding the minimal sum of the maximal absolute envies for 'instance'.
 def min_sum_max_abs_envy_time(instance):

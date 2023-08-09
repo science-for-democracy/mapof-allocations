@@ -51,6 +51,17 @@ registered_features_of_alloct_matrix = {
     "price_of_envy_pareto": or_features.price_of_envy_pareto,
     "price_of_envy_pareto_time": or_features.price_of_envy_pareto_time,
     "max_soc_welf_scaled": or_features.max_social_wel_scaled,
+    "abs_envies_sum_scaled": or_features.min_sum_max_abs_envy_scaled,
+    "abs_envies_sum": or_features.min_sum_max_abs_envy,
+    "max_soc_welf": or_features.max_social_wel,
+    "lsvd": features.larg_svd,
+    "slsvd": features.sec_larg_svd,
+    "deviation": features.level_deviation,
+    "min_demand": features.min_demand,
+    "max_demand": features.max_demand,
+    "effm": features.eff_m,
+    "sminded": features.frac_sm,
+    "density": features.density
 }
 
 

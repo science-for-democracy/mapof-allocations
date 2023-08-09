@@ -38,10 +38,81 @@ def diversity_of_demand(instance):
 
 def diversity_of_votes(instance):
     dist = 0
-    for i in range(instance.resources_count):
+    for i in range(instance.agents_count):
         row_i = np.array([instance[i]], dtype=float)
-        for j in range(instance.resources_count):
+        for j in range(instance.agents_count):
             row_j = np.array([instance[j]], dtype=float)
             dist += spatial.distance.cosine(row_i.tolist()[0], row_j.tolist()[0])
 
-    return dist / (instance.resources_count * (instance.resources_count - 1))
+    return dist / (instance.agents_count * (instance.agents_count - 1))
+
+
+def larg_svd(instance):
+    umf = [[float(v) for v in row] for row in instance.utility_matrix]
+    _, S, _ = np.linalg.svd(umf)
+    return S[0]
+
+
+def sec_larg_svd(instance):
+    umf = [[float(v) for v in row] for row in instance.utility_matrix]
+    _, S, _ = np.linalg.svd(umf)
+    return S[1]
+
+
+def level_deviation(instance):
+    usorted = [
+        sorted([float(i) for i in r], reverse=True) for r in instance.utility_matrix
+    ]
+    s = 0
+    n: int = instance.agents_count
+    for r in range(instance.resources_count):
+        s += np.std([usorted[a][r] for a in range(n)])
+    return s
+
+
+def min_demand(instance):
+    return min(
+        sum(instance[a][r] for a in range(instance.agents_count))
+        for r in range(instance.resources_count)
+    )
+
+
+def max_demand(instance):
+    return max(
+        sum(instance[a][r] for a in range(instance.agents_count))
+        for r in range(instance.resources_count)
+    )
+
+
+def eff_m(instance):
+    i = 0
+    for r in range(instance.resources_count):
+        if all(
+            instance.utility_matrix[a][r] == 0 for a in range(instance.agents_count)
+        ):
+            continue
+        i += 1
+    return i
+
+
+def frac_sm(instance):
+    sm_num = 0
+    for a in range(instance.agents_count):
+        wants = [
+            instance.utility_matrix[a][r]
+            for r in range(instance.resources_count)
+            if instance.utility_matrix[a][r] > 0
+        ]
+        if len(wants) == 1:
+            sm_num += 1
+    return sm_num / (instance.agents_count)
+
+
+def density(instance):
+    nonzeros = [
+        instance.utility_matrix[a][r]
+        for r in range(instance.resources_count)
+        for a in range(instance.agents_count)
+        if instance.utility_matrix[a][r] > 0
+    ]
+    return len(nonzeros) / (instance.agents_count * instance.resources_count)
