@@ -6,67 +6,84 @@ from fractions import Fraction
 from numpy.random import default_rng
 
 import mapel.allocations.core.logs as logs
+
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational
 
+
 def contention_alloct_matrix(agents_cnt, resources_cnt):
-	# 1 0 0 … 0
-	# 1 0 0 … 0
-	# …
-	# 1 0 0 … 0
-	logger.debug("Creating the CON allocation task matrix")
-	row = [Fraction(1)] + [Fraction(0) for _ in range(resources_cnt - 1)]
-	return [row for _ in range(agents_cnt)]
+    # 1 0 0 … 0
+    # 1 0 0 … 0
+    # …
+    # 1 0 0 … 0
+    logger.debug("Creating the CON allocation task matrix")
+    row = [Fraction(1)] + [Fraction(0) for _ in range(resources_cnt - 1)]
+    return [row for _ in range(agents_cnt)]
 
 
 def indifference_alloct_matrix(agents_cnt, resources_cnt):
-	# 1/m 1/m … 1/m
-	# 1/m 1/m … 1/m # …
-	# 1/m 1/m … 1/m
-	logger.debug("Creating the IND allocation task matrix")
-	row = [Fraction(1, resources_cnt) for _ in range(resources_cnt)]
-	return [row for _ in range(agents_cnt)]
+    # 1/m 1/m … 1/m
+    # 1/m 1/m … 1/m # …
+    # 1/m 1/m … 1/m
+    logger.debug("Creating the IND allocation task matrix")
+    row = [Fraction(1, resources_cnt) for _ in range(resources_cnt)]
+    return [row for _ in range(agents_cnt)]
 
 
 def separability_alloct_matrix(agents_cnt, resources_cnt):
-	# 1 0 0 … 0
-	# 0 1 0 … 0
-	# 0 0 1 … 0
-	# …
-	logger.debug("Creating the SEP allocation task matrix")
-	alloct_matrix = []
-	for a in range(agents_cnt):
-		row = [Fraction(0) for _ in range(resources_cnt)]
-		preceeding_zeros = a % resources_cnt
-		row[a % resources_cnt] = Fraction(1)
-		alloct_matrix.append(row)
-	return alloct_matrix
+    # 1 0 0 … 0
+    # 0 1 0 … 0
+    # 0 0 1 … 0
+    # …
+    logger.debug("Creating the SEP allocation task matrix")
+    alloct_matrix = []
+    for a in range(agents_cnt):
+        row = [Fraction(0) for _ in range(resources_cnt)]
+        preceeding_zeros = a % resources_cnt
+        row[a % resources_cnt] = Fraction(1)
+        alloct_matrix.append(row)
+    return alloct_matrix
 
-def blurred_separability_alloct_matrix(agents_cnt, resources_cnt, ratio = 0):
-	# 1-r  r   0 … 0
-	# 0    1-r r … 0
-	# 0    0   1-r r… 0
-	# …
-  logger.debug(f"Generating blurred separability with: {ratio}")
-  if ratio > 0.5 or ratio < 0.0:
-    raise ValueError(f"Blur ratio should be between 0.0 and 0.5 (inclusive).")
 
-  separability = separability_alloct_matrix(agents_cnt, resources_cnt)
-  new_matrix = []
-  new_diagonal_value = Fraction(1-ratio)
-  past_diagonal_value = Fraction(ratio)
+def separability2_alloct_matrix(agents_cnt, resources_cnt):
+    # 1/2 1/2 0 … 0
+    # 0     0 1/2 1/2 0  … 0
+    # …
+    logger.debug("Creating the SEP2 allocation task matrix")
+    alloct_matrix = []
+    for a in range(agents_cnt):
+        row = [Fraction(0) for _ in range(resources_cnt)]
+        row[a % int(resources_cnt/2)] = Fraction(1, 2)
+        row[a % int(resources_cnt/2)] = Fraction(1, 2)
+        alloct_matrix.append(row) 
+    return alloct_matrix
 
-  for i in range(len(separability)):
-    row_len = len(separability[i])
-    new_row = [Fraction(0)]*row_len
-    past_diagonal_index = (i + 1) % row_len
-    new_row[i] = new_diagonal_value
-    new_row[past_diagonal_index] = past_diagonal_value
-    new_matrix.append(new_row)
-  return new_matrix
 
-def dirichlet_matrix(agents_cnt, resources_cnt, alphas = None):
-  """For each agent independently, draw their values from a
+def blurred_separability_alloct_matrix(agents_cnt, resources_cnt, ratio=0):
+    # 1-r  r   0 … 0
+    # 0    1-r r … 0
+    # 0    0   1-r r… 0
+    # …
+    logger.debug(f"Generating blurred separability with: {ratio}")
+    if ratio > 0.5 or ratio < 0.0:
+        raise ValueError(f"Blur ratio should be between 0.0 and 0.5 (inclusive).")
+
+    separability = separability_alloct_matrix(agents_cnt, resources_cnt)
+    new_matrix = []
+    new_diagonal_value = Fraction(1 - ratio)
+    past_diagonal_value = Fraction(ratio)
+
+    for i in range(len(separability)):
+        row_len = len(separability[i])
+        new_row = [Fraction(0)] * row_len
+        past_diagonal_index = (i + 1) % row_len
+        new_row[i] = new_diagonal_value
+        new_row[past_diagonal_index] = past_diagonal_value
+        new_matrix.append(new_row)
+    return new_matrix
+
+def dirichlet_matrix(agents_cnt, resources_cnt, alphas=None):
+    """For each agent independently, draw their values from a
   scaled Dirichlet distribution. The Dirichlet distribution
   is parameterized by values αⱼ>0 for each resource j,
   which can bias the randomness towards high values for some
@@ -75,32 +92,33 @@ def dirichlet_matrix(agents_cnt, resources_cnt, alphas = None):
   drawn uniformly from the (scaled) standard simplex.
   """
 
-  logger.debug(f"Generating Dirichlet matrix with: {alphas}")
-  if alphas is None:
-    alphas = [1. for _ in range(resources_cnt)]
-  assert len(alphas) == resources_cnt
-  
-  float_matrix = default_rng().dirichlet(alphas, size=agents_cnt)
-  rational_matrix = float_matrix_to_rational(float_matrix)
-  return rational_matrix
+    logger.debug(f"Generating Dirichlet matrix with: {alphas}")
+    if alphas is None:
+        alphas = [1. for _ in range(resources_cnt)]
+    assert len(alphas) == resources_cnt
 
-def dirichlet_shift_matrix(agents_cnt, resources_cnt, shift_val, alphas = None):
-  """Generates the matrix using the dirichlet_matrix() function
+    float_matrix = default_rng().dirichlet(alphas, size=agents_cnt)
+    rational_matrix = float_matrix_to_rational(float_matrix)
+    return rational_matrix
+
+
+def dirichlet_shift_matrix(agents_cnt, resources_cnt, shift_val, alphas=None):
+    """Generates the matrix using the dirichlet_matrix() function
   and then circular-shifts each row by the given shift_val. The purpose is to gain
   a possibility of simulating different alphas vector for some agents. However,
   this function does the shift in a very structured manner. """
 
-  logger.debug(f"Generating Dirichlet-shifted matrix with: {alphas} and shift: {shift_val}")
-  non_shifted_matrix = dirichlet_matrix(agents_cnt, resources_cnt, alphas)
-  new_matrix = []
+    logger.debug(f"Generating Dirichlet-shifted matrix with: {alphas} and shift: {shift_val}")
+    non_shifted_matrix = dirichlet_matrix(agents_cnt, resources_cnt, alphas)
+    new_matrix = []
 
-  for i in range(len(non_shifted_matrix)):
-    row_len = len(non_shifted_matrix[i])
-    shift_by = i*shift_val
-    new_row = [Fraction(0)]*row_len
-    for j in range(row_len):
-      new_row_index = (j + shift_by) % row_len
-      new_row[new_row_index] = non_shifted_matrix[i][j]
-    new_matrix.append(new_row)
+    for i in range(len(non_shifted_matrix)):
+        row_len = len(non_shifted_matrix[i])
+        shift_by = i * shift_val
+        new_row = [Fraction(0)] * row_len
+        for j in range(row_len):
+            new_row_index = (j + shift_by) % row_len
+            new_row[new_row_index] = non_shifted_matrix[i][j]
+        new_matrix.append(new_row)
 
-  return new_matrix
+    return new_matrix

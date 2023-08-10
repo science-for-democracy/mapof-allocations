@@ -15,7 +15,7 @@ from mapel.core.objects.Experiment import Experiment
 from mapel.allocations.essentials import AllocationTaskFamily
 from mapel.allocations.core.alloctask import AllocationTask
 from mapel.core.utils import get_instance_id, make_folder_if_do_not_exist
-from mapel.core.persistence.experiment_exports import export_feature
+from mapel.core.persistence.experiment_exports import export_feature_to_file
 import mapel.allocations.metrics.surveying as surveying
 from mapel.allocations.core.pot import registered_features_of_alloct_matrix
 
@@ -37,7 +37,9 @@ class AllocationExperiment(Experiment):
           self.all_exps_location = os.path.join(os.getcwd(), "experiments")
           self.exp_location = os.path.join(self.all_exps_location, experiment_id)
           self.map_csv_path = os.path.join(self.exp_location, "map.csv")
-        super().__init__(experiment_id=experiment_id, **kwargs)
+        super().__init__(experiment_id=experiment_id,
+                         instance_type='allocation',
+                         **kwargs)
 
     def create_structure(self) -> None:
         logger.debug(f"Experiment's {self.experiment_id} structure created in "
@@ -168,7 +170,7 @@ class AllocationExperiment(Experiment):
             logger.debug(f'Preparing: {family_id}')
 
             new_instances = self.families[family_id].prepare_family(
-                store=self.is_exported,
+                is_exported=self.is_exported,
                 experiment_id=self.experiment_id,
                 store_points=store_points,
                 aggregated=aggregated)
@@ -185,9 +187,7 @@ class AllocationExperiment(Experiment):
 
             ids = []
             instances_count = self.families[family_id].size
-            # A hack for families of size unknown at the time of wriitn map.csv
-            if instances_count == 0:
-                instances_count = 999999999999
+
             for j in range(instances_count):
                 instance_id = get_instance_id(single, family_id, j)
                 logger.debug(f"Reading in instance: {instance_id}")
@@ -343,7 +343,7 @@ class AllocationExperiment(Experiment):
 
         if self.is_exported:
             feature_long_id = feature_id
-            export_feature(self, feature_dict, saveas=feature_long_id)
+            export_feature_to_file(self, feature_id, feature_long_id, feature_dict)
 
         self.features[feature_id] = feature_dict
         return feature_dict

@@ -15,7 +15,7 @@ from mapel.core.utils import get_instance_id
 
 
 class AllocationTaskFamily(Family):
-  
+
   @classmethod
   def from_one_alloc_task(cls, alloc_task, family_id, **kwargs):
     return AllocationTaskFamily(family_id = family_id, single = True,
@@ -64,7 +64,7 @@ class AllocationTaskFamily(Family):
     self.allocation_tasks = [] + ready_instances
     self.instance_ids = [t.instance_id for t in ready_instances]
 
-  def prepare_family(self, experiment_id=None, store=None,
+  def prepare_family(self, experiment_id=None, is_exported=False,
                      store_points=False, aggregated=True):
     if self.allocation_tasks != []:
       return self.allocation_tasks
@@ -94,6 +94,10 @@ class AllocationTaskFamily(Family):
           self.agents_count, self.resources_count, self.culture_id, instance_filename)
           instances[instance_id] = instance
           counter += 1
+          if counter >= self.size:
+              break
+        if counter >= self.size:
+            break
     elif self.culture_id == "collect_instances":
       max_instances = self.size
       basepath = self.params["basepath"]
@@ -114,7 +118,7 @@ class AllocationTaskFamily(Family):
           instance_filename  = os.path.join(root, filename)
           instance_id = get_instance_id(self.single, self.family_id, counter)
 
-          try: 
+          try:
             utility_matrix = \
             misc.from_mapel_allocation_instance(self.agents_count, self.
                                                 resources_count, instance_filename)
@@ -137,7 +141,7 @@ class AllocationTaskFamily(Family):
                                              )
         instances[instance_id] = instance
 
-    if store:
+    if is_exported:
       for instance in instances.values():
         lib = AllocationTaskLibrarian()
         lib.write(instance, os.path.join("experiments", experiment_id, "instances"))

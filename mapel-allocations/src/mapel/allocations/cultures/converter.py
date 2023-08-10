@@ -1,5 +1,9 @@
+import copy
+
 import numpy as np
 from fractions import Fraction
+from numpy.random import default_rng
+import random
 
 from mapel.elections.cultures_ import generate_approval_votes
 from mapel.elections.cultures_ import generate_ordinal_votes
@@ -13,7 +17,7 @@ def convert_approval_votes_to_utility_matrix(culture_id=None,
                                              params=None):
 
     params, _ = update_params_approval(params, dict(), None, culture_id, num_candidates = resources_cnt)
-
+    print(params)
     approval_votes = generate_approval_votes(culture_id=culture_id,
                                              num_voters=agents_cnt,
                                              num_candidates=resources_cnt,
@@ -28,7 +32,9 @@ def convert_approval_votes_to_utility_matrix(culture_id=None,
 
     for i in range(agents_cnt):
         if sum(utility_matrix[i]) == 0.:
-            utility_matrix[i] = [Fraction(1, resources_cnt) for _ in range(resources_cnt)]
+            # utility_matrix[i] = [Fraction(1, resources_cnt) for _ in range(resources_cnt)]
+            utility_matrix[i] = [0 for _ in range(resources_cnt)]
+            utility_matrix[i][random.randint(0, resources_cnt - 1)] = 1
 
     return utility_matrix
 
@@ -96,7 +102,6 @@ def get_func_from_str(func, n):
     return vector
 
 
-
 def convert_ordinal_votes_to_utility_matrix__proportional(culture_id=None,
                                                           agents_cnt=None,
                                                           resources_cnt=None,
@@ -133,7 +138,7 @@ def ordinal(agents_cnt, resources_cnt, culture_id, ordinal_params, func):
     return convert_ordinal_votes_to_utility_matrix__proportional(culture_id=culture_id,
                                                                  agents_cnt=agents_cnt,
                                                                  resources_cnt=resources_cnt,
-                                                                 params=ordinal_params,
+                                                                 params=copy.deepcopy(ordinal_params),
                                                                  func=func)
     # return convert_ordinal_votes_to_utility_matrix__top_k(culture_id=culture_id,
     #                                                       agents_cnt=agents_cnt,
@@ -146,4 +151,4 @@ def approval(agents_cnt, resources_cnt, culture_id, approval_params):
     return convert_approval_votes_to_utility_matrix(culture_id=culture_id,
                                                     agents_cnt=agents_cnt,
                                                     resources_cnt=resources_cnt,
-                                                    params=approval_params,)
+                                                    params=copy.deepcopy(approval_params))
