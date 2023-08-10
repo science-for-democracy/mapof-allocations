@@ -44,7 +44,10 @@ class AllocationTask(Instance):
         librarian = AllocationTaskLibrarian()
         path_to_file = os.path.join("experiments", experiment_id, "instances", instance_id + ".alt")
         utility_matrix = librarian.read(path_to_file)
-        return AllocationTask.from_matrix(utility_matrix, instance_id, None, **kwargs)
+        task = AllocationTask.from_matrix(utility_matrix, instance_id, None, **kwargs)
+        # A hack to have the path always
+        task.path = path_to_file
+        return task
 
     def __init__(self, utility_matrix, experiment_id, instance_id,
                  culture_id=None, alpha=None, **kwargs):

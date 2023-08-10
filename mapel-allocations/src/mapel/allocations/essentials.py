@@ -102,7 +102,7 @@ class AllocationTaskFamily(Family):
       max_instances = self.size
       basepath = self.params["basepath"]
       ext = self.params["ext"]
-      logger.debug(f"Collecting spliddit instaces from '{basepath}' ("
+      logger.debug(f"Collecting mapel instaces from '{basepath}' ("
       f"{self.agents_count} agents and {self.resources_count} resources)")
       counter = 0
       for root, dirs, files in os.walk(basepath):
@@ -123,10 +123,12 @@ class AllocationTaskFamily(Family):
             misc.from_mapel_allocation_instance(self.agents_count, self.
                                                 resources_count, instance_filename)
           except ValueError as e:
-            logger.debug(f"File {filename} ommited due to incompatible agents \
-                         and/or resources counts.")
+            logger.debug(f"File {filename} ommited due to incompatible agents"
+                         " and/or resources counts.")
             continue
           instance = AllocationTask.from_matrix(utility_matrix, instance_id, self.culture_id)
+          #A dirty hack to have a path
+          instance.path = instance_filename 
           instances[instance_id] = instance
           counter += 1
     else:
@@ -144,7 +146,14 @@ class AllocationTaskFamily(Family):
     if is_exported:
       for instance in instances.values():
         lib = AllocationTaskLibrarian()
-        lib.write(instance, os.path.join("experiments", experiment_id, "instances"))
+        filename = instance.__dict__.get("path", None)
+        custom_line = None
+        if filename:
+          with open(filename, "r") as instancefile:
+            lines = [line.strip() for line in instancefile]
+            custom_line = f"{lines[-2]}\n{lines[-1]}"
+        lib.write(instance, os.path.join("experiments", experiment_id,
+                                         "instances"), custom_line)
 
     self.instance_ids = instances.keys()
 

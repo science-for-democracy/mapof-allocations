@@ -23,7 +23,6 @@ def approval_dirichlet(agents_cnt=None,
         p=p)
 
     utility_matrix = []
-    print(approval_votes)
 
     for i, vote in enumerate(approval_votes):
         if len(vote) == 0:

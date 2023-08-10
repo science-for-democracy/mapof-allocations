@@ -33,12 +33,12 @@ class AllocationExperiment(Experiment):
         return experiment
 
     def __init__(self, experiment_id, **kwargs):
+        self.instance_type = "allocation"
         if experiment_id:
           self.all_exps_location = os.path.join(os.getcwd(), "experiments")
           self.exp_location = os.path.join(self.all_exps_location, experiment_id)
           self.map_csv_path = os.path.join(self.exp_location, "map.csv")
         super().__init__(experiment_id=experiment_id,
-                         instance_type='allocation',
                          **kwargs)
 
     def create_structure(self) -> None:
@@ -197,7 +197,8 @@ class AllocationExperiment(Experiment):
                     instance = AllocationTask.from_file(instance_id,
                                                         self.experiment_id)
                 except ValueError:
-                    break
+                  logger.warning(f"Error reading in {instance_id}. Stopped processing family {family_id}.")
+                  break
 
                 instances[instance_id] = instance
                 ids.append(str(instance_id))
