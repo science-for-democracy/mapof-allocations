@@ -17,7 +17,6 @@ def convert_approval_votes_to_utility_matrix(culture_id=None,
                                              params=None):
 
     params, _ = update_params_approval(params, dict(), None, culture_id, num_candidates = resources_cnt)
-    print(params)
     approval_votes = generate_approval_votes(culture_id=culture_id,
                                              num_voters=agents_cnt,
                                              num_candidates=resources_cnt,

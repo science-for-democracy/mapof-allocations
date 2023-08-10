@@ -8,6 +8,7 @@ import mapel.allocations.cultures.euclidean as euc
 import mapel.allocations.cultures.misc as misc
 import mapel.allocations.cultures.converter as converter
 import mapel.allocations.cultures.paths as paths
+import mapel.allocations.cultures.approval_dirichlet as apprd
 
 import mapel.allocations.features.basic_features as features
 import mapel.allocations.features.or_tools_features.wrapper as or_features
@@ -28,6 +29,8 @@ registered_cultures_of_alloct_matrix = {
     "dirichlet_shift": basic.dirichlet_shift_matrix,
     "blurred_separability": basic.blurred_separability_alloct_matrix,
     "attributes": euc.attributes_alloc_matrix,
+    "approval_dirichlet": apprd.approval_dirichlet,
+    "euclidean": euc.euclidean_alloc_matrix
 }
 
 registered_features_of_alloct_matrix = {
