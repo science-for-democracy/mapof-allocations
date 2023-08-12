@@ -34,7 +34,7 @@ def approval_dirichlet(agents_cnt=None,
                 alphas[int(candidate)] = 1.
             vector = default_rng().dirichlet(alphas, size=1)[0].tolist()
 
-        utility_matrix.append(vector)
+        utility_matrix.append(list(map(Fraction, vector)))
 
     return utility_matrix
 

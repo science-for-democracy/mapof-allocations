@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 import mapel.allocations.core.logs as logs
 
 logger = logs.get_logger(__name__)
@@ -78,7 +80,11 @@ def get_matr_for_culture(culture_id: str,
 
     logger.debug(f'Getting: {culture_id}')
     if generator := registered_cultures_of_alloct_matrix.get(culture_id, None):
-        return generator(agents_count, resources_count, **params)
+        matrix = generator(agents_count, resources_count, **params)
+        fractional_matrix = []
+        for row in matrix:
+          fractional_matrix.append(list(map(Fraction, row)))
+        return fractional_matrix
 
     logger.warning(f'No such culture id: {culture_id}. ID returned')
     return [[1] + [0] * (resources_count - 1) for _ in range(agents_count)]

@@ -84,6 +84,8 @@ class AllocationTaskFamily(Family):
       for root, dirs, files in os.walk(basepath):
         if root != basepath:
           continue
+        import random
+        random.shuffle(files)
         for filename in files:
           if not filename.startswith(f"{self.agents_count}_{self.resources_count}_"):
             continue
@@ -108,6 +110,8 @@ class AllocationTaskFamily(Family):
       for root, dirs, files in os.walk(basepath):
         if root != basepath:
           continue
+        import random
+        random.shuffle(files)
         for filename in files:
           if counter == max_instances:
             logger.info(f"Acheived the limit of {max_instances} loaded!")
