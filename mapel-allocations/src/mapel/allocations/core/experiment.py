@@ -34,9 +34,9 @@ class AllocationExperiment(Experiment):
 
     def __init__(self, experiment_id, **kwargs):
         if experiment_id:
-          self.all_exps_location = os.path.join(os.getcwd(), "experiments")
-          self.exp_location = os.path.join(self.all_exps_location, experiment_id)
-          self.map_csv_path = os.path.join(self.exp_location, "map.csv")
+            self.all_exps_location = os.path.join(os.getcwd(), "experiments")
+            self.exp_location = os.path.join(self.all_exps_location, experiment_id)
+            self.map_csv_path = os.path.join(self.exp_location, "map.csv")
         super().__init__(experiment_id=experiment_id,
                          instance_type='allocation',
                          **kwargs)
@@ -71,7 +71,8 @@ class AllocationExperiment(Experiment):
         with open(self.map_csv_path, 'r') as file_:
 
             header = [h.strip() for h in file_.readline().split(';')]
-            reader = csv.DictReader(filter(lambda row: row[0]!="#", file_), fieldnames=header, delimiter=';')
+            reader = csv.DictReader(filter(lambda row: row[0] != "#", file_), fieldnames=header,
+                                    delimiter=';')
 
             all_num_candidates = []
             all_num_voters = []
@@ -276,7 +277,6 @@ class AllocationExperiment(Experiment):
             for j, instance_2 in enumerate(self.instances):
                 if i < j or (i == j and self_distances):
                     ids.append((instance_1, instance_2))
-
 
         with tqdm(total=len(ids)) as pbar:
             for left_task_id, right_task_id in ids:

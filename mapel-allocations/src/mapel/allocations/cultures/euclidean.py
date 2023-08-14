@@ -12,14 +12,20 @@ def euclidean_alloc_matrix(agents_cnt, resources_cnt, dim=2, space='uniform'):
         resources_ = np.random.rand(resources_cnt, dim)
         agents_ = np.random.rand(resources_cnt, dim)
 
-    utility_matrix = np.zeros([agents_cnt, resources_cnt], dtype=float)
+    distance_matrix = np.zeros([agents_cnt, resources_cnt], dtype=float)
 
     for v in range(agents_cnt):
         for c in range(resources_cnt):
             if dim == 1:
-                utility_matrix[v][c] = abs(agents_[v] - resources_[c])
+                distance_matrix[v][c] = abs(agents_[v] - resources_[c])
             else:
-                utility_matrix[v][c] = np.linalg.norm(agents_[v] - resources_[c])
+                distance_matrix[v][c] = np.linalg.norm(agents_[v] - resources_[c])
+
+    utility_matrix = np.zeros([agents_cnt, resources_cnt], dtype=float)
+
+    for v in range(agents_cnt):
+        for c in range(resources_cnt):
+            utility_matrix[v][c] = 1 - distance_matrix[v][c]/max(distance_matrix[v])
 
     utility_matrix = normalize(utility_matrix, axis=1, norm='l1')
     return utility_matrix.tolist()
