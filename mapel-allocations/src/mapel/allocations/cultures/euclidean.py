@@ -9,8 +9,8 @@ def euclidean_alloc_matrix(agents_cnt, resources_cnt, dim=2, space='uniform'):
         resources_ = np.random.rand(resources_cnt, dim)
         agents_ = np.random.rand(agents_cnt, dim)
     elif space == 'gaussian':
-        resources_ = np.random.rand(resources_cnt, dim)
-        agents_ = np.random.rand(resources_cnt, dim)
+        resources_ = np.random.normal(loc=0.5, scale=0.15, size=(resources_cnt, dim))
+        agents_ = np.random.normal(loc=0.5, scale=0.15, size=(agents_cnt, dim))
 
     distance_matrix = np.zeros([agents_cnt, resources_cnt], dtype=float)
 
