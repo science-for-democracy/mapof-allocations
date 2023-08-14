@@ -45,17 +45,41 @@ def separability_alloct_matrix(agents_cnt, resources_cnt):
     return alloct_matrix
 
 
-def separability2_alloct_matrix(agents_cnt, resources_cnt):
+def wide_separability_alloct_matrix(agents_cnt, resources_cnt):
     # 1/2 1/2 0 … 0
     # 0     0 1/2 1/2 0  … 0
     # …
-    logger.debug("Creating the SEP2 allocation task matrix")
+    logger.debug("Creating the wide separability allocation task matrix")
+    if resources_cnt < 2*agents_cnt:
+      logger.warning("Wide separability applied for an instance in which"
+                     " the number of resources is smaller than the number of"
+                     " agents divided by two.")
     alloct_matrix = []
     for a in range(agents_cnt):
-        row = [Fraction(0) for _ in range(resources_cnt)]
-        row[a % int(resources_cnt/2)] = Fraction(1, 2)
-        row[a % int(resources_cnt/2)] = Fraction(1, 2)
-        alloct_matrix.append(row) 
+      row = [Fraction(0) for _ in range(resources_cnt)]
+      row[(2*a) % resources_cnt] = Fraction(1, 2)
+      row[(2*a + 1) % resources_cnt] = Fraction(1, 2)
+      alloct_matrix.append(row) 
+    return alloct_matrix
+
+def bicontention_alloct_matrix(agents_cnt, resources_cnt):
+    # 1 0 0 … 0
+    # . . . . .
+    # 1 0 0 … 0
+    # 0 1 0 … 0
+    # . . . . .
+    # 0 1 0 … 0
+    # 0 0 1 … 0 (if the number of agents is odd)
+    logger.debug("Creating the bicontention allocation task matrix")
+    alloct_matrix = []
+    half_agents = int(agents_cnt/2)
+    for a in range(agents_cnt):
+      row = [Fraction(0) for _ in range(resources_cnt)]
+      if a >= half_agents*2:
+        row[2] = Fraction(1)
+      else:
+        row[a % half_agents] = Fraction(1)
+      alloct_matrix.append(row) 
     return alloct_matrix
 
 

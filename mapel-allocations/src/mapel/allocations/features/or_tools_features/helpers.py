@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from fractions import Fraction
-from math import lcm
+from math import lcm, floor
 from time import perf_counter
 
 from colorama import Fore
@@ -63,15 +63,34 @@ def get_status_str_pywraplp(status):
     return status_str
 
 
-# Determines the Fraction with the smallest positive denominator
-# so that the absolute difference between it and the float 'u' is at most 1e-10.
-def get_fraction(u: float) -> Fraction:
-    denominator = 1
-    numerator = u * denominator
-    while abs(numerator - round(numerator)) > 1e-10:
-        denominator += 1
-        numerator = u * denominator
-    return Fraction(round(numerator), denominator)
+# Determines a Fraction (with the smallest positive denominator)
+# so that the absolute difference between it and the float value is at most err.
+# Based on https://en.wikipedia.org/wiki/Continued_fraction
+# TODO returns Fraction(value) to be safe for now
+def get_fraction(value: float, err: float = 1e-10) -> Fraction:
+    return Fraction(value)
+
+    coeffs: list[int] = []
+    fraction = Fraction(value)
+
+    while True:
+        integer_part = floor(fraction)
+        fraction -= integer_part
+        if fraction == 0:
+            break
+        fraction = 1 / fraction
+
+        coeffs.append(integer_part)
+
+        approx_frac = Fraction()
+        for coefficient in reversed(coeffs[1:]):
+            approx_frac = Fraction(1, (coefficient + approx_frac))
+        approx_frac = coeffs[0] + approx_frac
+
+        if abs(approx_frac - value) < err:
+            return approx_frac
+
+    return Fraction(value)
 
 
 # Transforms each Fraction from 'fract_utils' into an integer by multiplying them

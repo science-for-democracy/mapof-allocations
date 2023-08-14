@@ -7,10 +7,13 @@ import mapel.allocations.core.alloctasklibrarian as librarian
 
 def check_agents_and_resources_counts(utility_matrix, agents_cnt, resources_cnt):
     if len(utility_matrix) != agents_cnt:
+        logger.warning(f"ab: {agents_cnt} {resources_cnt}")
+        logger.warning(f"{utility_matrix}")
         raise ValueError("The collected allocation task does not have "
                          f"{agents_cnt} agents")
     for agent_utils in utility_matrix:
         if len(agent_utils) != resources_cnt:
+            logger.warning("cd")
             raise ValueError(f"At least one of the agents does not report "
                              f"{resources_cnt} utility values.")
 
@@ -41,8 +44,8 @@ def from_spliddit_file_matrix(agents_cnt, resources_cnt, path):
 
 def from_mapel_allocation_instance(agents_cnt, resources_cnt, path, ensure_sizes=True):
     """
-   Reads in a mapel allocation instance. 
-  """
+    Reads in a mapel allocation instance. 
+    """
     logger.debug(f"Reading in mapel task allocation file: {path}")
     rational_utility_matrix = librarian.AllocationTaskLibrarian.read_utility_matrix(path)
     if ensure_sizes:

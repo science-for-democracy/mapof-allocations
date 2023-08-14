@@ -27,7 +27,6 @@ class AllocationTaskLibrarian:
                     fractions = line.split(" ")
                     fractions = list(map(Fraction, fractions))
                     utility_matrix.append(fractions)
-
         return utility_matrix
         
     def read(self, path_to_file):
@@ -35,7 +34,7 @@ class AllocationTaskLibrarian:
 
         return AllocationTaskLibrarian.read_utility_matrix(path_to_file)
 
-    def write(self, allocation, location):
+    def write(self, allocation, location, custom_suffix = None):
         self._prepare_location(location)
         path_to_file = os.path.join(location, f'{allocation.instance_id}.alt')
 
@@ -55,6 +54,9 @@ class AllocationTaskLibrarian:
                 ffile.write("# ")
                 outstr = "\t".join(map(str, [round(float(n), 5) for n in row]))
                 ffile.write(f"{outstr}\n")
+            if custom_suffix:
+                ffile.write(custom_suffix)
+                ffile.write("\n")
 
     def _prepare_location(self, location):
         make_folder_if_do_not_exist(location)
