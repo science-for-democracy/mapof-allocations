@@ -7,8 +7,6 @@ import mapel.allocations.core.alloctasklibrarian as librarian
 
 def check_agents_and_resources_counts(utility_matrix, agents_cnt, resources_cnt):
     if len(utility_matrix) != agents_cnt:
-        logger.warning(f"ab: {agents_cnt} {resources_cnt}")
-        logger.warning(f"{utility_matrix}")
         raise ValueError("The collected allocation task does not have "
                          f"{agents_cnt} agents")
     for agent_utils in utility_matrix:
