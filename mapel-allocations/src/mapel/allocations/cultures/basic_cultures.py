@@ -75,10 +75,25 @@ def bicontention_alloct_matrix(agents_cnt, resources_cnt):
     half_agents = int(agents_cnt/2)
     for a in range(agents_cnt):
       row = [Fraction(0) for _ in range(resources_cnt)]
-      if a >= half_agents*2:
-        row[2] = Fraction(1)
+      if a < half_agents:
+        row[0] = Fraction(1)
+      elif a >= half_agents and a < 2*half_agents:
+        row[1] = Fraction(1)
       else:
-        row[a % half_agents] = Fraction(1)
+        row[2] = Fraction(1)
+      alloct_matrix.append(row) 
+    return alloct_matrix
+
+def lowerdiag_alloct_matrix(agents_cnt, resources_cnt):
+    # 1 0 0 … 0
+    # 1/2 1/2 0 0 0
+    # 1/3 1/3 1/3 0 
+    logger.debug("Creating the lower diagonal allocation task matrix")
+    alloct_matrix = []
+    for a in range(agents_cnt):
+      row = [Fraction(0) for _ in range(resources_cnt)]
+      for i in range(a+1):
+          row[i] = Fraction(1, a+1)
       alloct_matrix.append(row) 
     return alloct_matrix
 

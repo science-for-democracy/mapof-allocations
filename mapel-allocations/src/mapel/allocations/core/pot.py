@@ -22,6 +22,7 @@ registered_cultures_of_alloct_matrix = {
     "indifference": basic.indifference_alloct_matrix,
     "separability": basic.separability_alloct_matrix,
     "wideseparability": basic.wide_separability_alloct_matrix,
+    "lowerdiag": basic.lowerdiag_alloct_matrix,
     "dirichlet": basic.dirichlet_matrix,
     "from_spliddit": misc.from_spliddit_file_matrix,
     "from_mapel_instance": misc.from_mapel_allocation_instance,
