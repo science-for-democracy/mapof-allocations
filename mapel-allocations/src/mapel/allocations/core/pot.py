@@ -27,15 +27,19 @@ registered_cultures_of_alloct_matrix = {
     "from_mapel_instance": misc.from_mapel_allocation_instance,
     'ordinal': converter.ordinal,
     'approval': converter.approval,
-    'idun': paths.get_idun_path_utility_matrix,
-    'idsep': paths.get_idsep_path_utility_matrix,
-    'unsep': paths.get_unsep_path_utility_matrix,
+    # 'idun': paths.get_idun_path_utility_matrix,
+    # 'idsep': paths.get_idsep_path_utility_matrix,
+    # 'unsep': paths.get_unsep_path_utility_matrix,
     "dirichlet_shift": basic.dirichlet_shift_matrix,
     "blurred_separability": basic.blurred_separability_alloct_matrix,
     "attributes": euc.attributes_alloc_matrix,
     "approval_dirichlet": apprd.approval_dirichlet,
-    "euclidean": euc.euclidean_alloc_matrix
+    "euclidean": euc.euclidean_alloc_matrix,
+    "indsep": paths.get_indsep_convex_utility_matrix,
+    "consep": paths.get_consep_convex_utility_matrix,
+    "indcon": paths.get_indcon_convex_utility_matrix,
 }
+
 
 registered_features_of_alloct_matrix = {
     'pickiness': features.pickiness,

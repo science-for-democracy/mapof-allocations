@@ -1,6 +1,8 @@
 from fractions import Fraction
+from mapel.allocations.cultures.basic_cultures import *
+import numpy as np
 
-
+# depr
 def get_idun_path_utility_matrix(agents_cnt, resources_cnt, k=1):
     """
     for k=1 we get ID
@@ -10,6 +12,7 @@ def get_idun_path_utility_matrix(agents_cnt, resources_cnt, k=1):
     return [row for _ in range(agents_cnt)]
 
 
+# depr
 def get_idsep_path_utility_matrix(agents_cnt, resources_cnt, k=1):
     """
     for k=1 we get ID
@@ -24,6 +27,7 @@ def get_idsep_path_utility_matrix(agents_cnt, resources_cnt, k=1):
     return matrix
 
 
+# depr
 def get_unsep_path_utility_matrix(agents_cnt, resources_cnt, k=1):
     """
     for k=1 we get UN
@@ -34,3 +38,59 @@ def get_unsep_path_utility_matrix(agents_cnt, resources_cnt, k=1):
         for j in range(k):
             matrix[i][(i+j) % resources_cnt] = Fraction(1, k)
     return matrix
+
+
+# convex
+def get_indsep_convex_utility_matrix(agents_cnt, resources_cnt, alpha=None):
+
+    if alpha is None:
+        alpha = np.random.random()
+
+    matrix = [[Fraction(0) for _ in range(resources_cnt)] for _ in range(agents_cnt)]
+    IND = indifference_alloct_matrix(agents_cnt, resources_cnt)
+    SEP = separability_alloct_matrix(agents_cnt, resources_cnt)
+
+    for i in range(agents_cnt):
+        for j in range(resources_cnt):
+            a = alpha * IND[i][j]
+            b = (1-alpha) * SEP[i][j]
+            matrix[i][j] = Fraction(a+b)
+
+    return matrix
+
+# convex
+def get_indcon_convex_utility_matrix(agents_cnt, resources_cnt, alpha=None):
+
+    if alpha is None:
+        alpha = np.random.random()
+
+    matrix = [[Fraction(0) for _ in range(resources_cnt)] for _ in range(agents_cnt)]
+    IND = indifference_alloct_matrix(agents_cnt, resources_cnt)
+    CON = contention_alloct_matrix(agents_cnt, resources_cnt)
+
+    for i in range(agents_cnt):
+        for j in range(resources_cnt):
+            a = alpha * IND[i][j]
+            b = (1-alpha) * CON[i][j]
+            matrix[i][j] = Fraction(a+b)
+
+    return matrix
+
+# convex
+def get_consep_convex_utility_matrix(agents_cnt, resources_cnt, alpha=None):
+
+    if alpha is None:
+        alpha = np.random.random()
+
+    matrix = [[Fraction(0) for _ in range(resources_cnt)] for _ in range(agents_cnt)]
+    CON = contention_alloct_matrix(agents_cnt, resources_cnt)
+    SEP = separability_alloct_matrix(agents_cnt, resources_cnt)
+
+    for i in range(agents_cnt):
+        for j in range(resources_cnt):
+            a = alpha * CON[i][j]
+            b = (1-alpha) * SEP[i][j]
+            matrix[i][j] = Fraction(a+b)
+
+    return matrix
+
