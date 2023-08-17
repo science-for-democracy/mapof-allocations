@@ -27,4 +27,3 @@ def convert_to_vectors(task):
     for i in range(task.resources_count):
         vectors[i] = sorted(utility_matrix[:, i])
     return vectors
-

@@ -44,8 +44,10 @@ registered_cultures_of_alloct_matrix = {
 
 registered_features_of_alloct_matrix = {
     'pickiness': features.pickiness,
+    'one_minus_pickiness': features.one_minus_pickiness,
     'diversity_of_demand': features.diversity_of_demand,
     'diversity_of_votes': features.diversity_of_votes,
+    'diversity_of_votes_l2': features.diversity_of_votes_l2,
     "ex_envy_free": or_features.exists_envy_free,
     "ex_envy_free_time": or_features.exists_envy_free_time,
     "abs_envy": or_features.min_max_abs_envy,
@@ -73,7 +75,8 @@ registered_features_of_alloct_matrix = {
     "max_demand": features.max_demand,
     "effm": features.eff_m,
     "sminded": features.frac_sm,
-    "density": features.density
+    "density": features.density,
+    "all_three": features.all_three,
 }
 
 

@@ -28,6 +28,10 @@ def pickiness(instance):
     return norm_value
 
 
+def one_minus_pickiness(instance):
+    return 1 - pickiness(instance)
+
+
 def diversity_of_demand(instance):
     array = []
     for i in range(instance.resources_count):
@@ -45,6 +49,23 @@ def diversity_of_votes(instance):
             dist += spatial.distance.cosine(row_i.tolist()[0], row_j.tolist()[0])
 
     return dist / (instance.agents_count * (instance.agents_count - 1))
+
+
+def diversity_of_votes_l2(instance):
+    dist = 0
+    for i in range(instance.agents_count):
+        row_i = np.array([instance[i]], dtype=float)
+        for j in range(instance.agents_count):
+            row_j = np.array([instance[j]], dtype=float)
+            dist += np.linalg.norm(row_i - row_j, ord=2)
+
+    largest_dist = (2**0.5)*instance.agents_count*(instance.agents_count-1)
+
+    return dist / largest_dist
+
+
+def all_three(instance):
+    return diversity_of_demand(instance) + diversity_of_votes(instance) + one_minus_pickiness(instance)
 
 
 def larg_svd(instance):
