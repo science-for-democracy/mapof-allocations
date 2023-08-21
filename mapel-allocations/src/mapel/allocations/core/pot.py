@@ -54,8 +54,8 @@ registered_features_of_alloct_matrix = {
     "abs_envy_time": or_features.min_max_abs_envy_time,
     "rel_envy": or_features.relative_envy,
     "rel_envy_time": or_features.relative_envy_time,
-    "nash": or_features.nash,
-    "nash_time": or_features.nash_time,
+    "nash": or_features.nash_new,
+    "nash_time": or_features.nash_time_new,
     "ex_envy_pareto": or_features.exists_envy_free_pareto,
     "ex_envy_pareto_time": or_features.exists_envy_free_pareto_time,
     "ex_mms": or_features.exists_mms,
@@ -77,6 +77,8 @@ registered_features_of_alloct_matrix = {
     "sminded": features.frac_sm,
     "density": features.density,
     "all_three": features.all_three,
+    "pref_div": features.preference_diversity,
+    "sum_pddivomp": features.sum_pref_demand_div_one_minus_picki,
 }
 
 

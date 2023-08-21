@@ -5,8 +5,9 @@ from ortools.linear_solver import pywraplp
 from .feature_data import FeatureData, Solution
 from .helpers import get_status_str_pywraplp
 
-
-# Implementation of https://dl.acm.org/doi/10.1145/3355902, Fig. 4.
+# This is currently not used.
+# Implementation of https://dl.acm.org/doi/10.1145/3355902, Fig. 4
+# (“The Unreasonable Fairness of Maximum Nash Welfare”).
 # The assumption is that each utility is >= 0. If not every agent can get a bundle with
 # an utility of at least 1, the problem is infeasible.
 # The function returns a tuple consisting of

@@ -1,4 +1,5 @@
 from fractions import Fraction
+from typing import Iterable
 
 from .envy_features import (
     Goal,
@@ -117,6 +118,7 @@ def relative_envy_time(instance):
 # taking only 4 decimal places of floats into account ('get_int_utility_matrix_accuracy').
 # If no solution can be determined with the help of the function "nash_or_tools",
 # 0 is returned.
+# This is currently not used
 def nash_helper(instance):
     umatrix = instance.utility_matrix
     utils_ints = get_int_utility_matrix(umatrix)
@@ -134,15 +136,62 @@ def nash_helper(instance):
 
 
 # Returns the maximum Nash welfare for 'instance'.
-# If not every agent can get a bundle with an utility of at least 1, 0 is returned.
+# This is currently not used.
 def nash(instance):
     value, _ = nash_helper(instance)
     return value
 
 
 # Returns the runtime of searching the maximum Nash welfare for 'instance'.
+# This is currently not used.
 def nash_time(instance):
     _, t = nash_helper(instance)
+    return t
+
+
+# Returns the maximum Nash welfare for 'instance' and the time needed for finding it.
+def nash_helper_new(instance):
+    fdata = FeatureData(instance.utility_matrix)
+    res_num: int = instance.resources_count
+    ag_num: int = instance.agents_count
+
+    def allocs():
+        def rec(cur_res: int) -> Iterable[tuple[int, ...]]:
+            if cur_res == res_num:
+                yield tuple()
+                return
+
+            for i in range(ag_num):
+                for alloc in rec(cur_res + 1):
+                    yield (i,) + alloc
+
+        return rec(0)
+
+    def alloc_mats():
+        for alloc in allocs():
+            mat = [[False] * res_num for _ in range(ag_num)]
+            for res, ag in enumerate(alloc):
+                mat[ag][res] = True
+            yield mat
+
+    with Timer() as t:
+        best_nash = 0
+        for alloc in alloc_mats():
+            cnash = fdata.get_nash_welfare(alloc)
+            if cnash > best_nash:
+                best_nash = cnash
+    return best_nash, t.time
+
+
+# Returns the maximum Nash welfare for 'instance'.
+def nash_new(instance):
+    value, _ = nash_helper_new(instance)
+    return value
+
+
+# Returns the runtime of searching the maximum Nash welfare for 'instance'.
+def nash_time_new(instance):
+    _, t = nash_helper_new(instance)
     return t
 
 
@@ -397,10 +446,12 @@ def min_sum_max_abs_envy(instance):
     assert res is not None
     return FeatureData(instance.utility_matrix).get_sum_max_abs_envies(res)
 
+
 # Returns the minimal sum of the maximal absolute envies divided by the number of agents.
 def min_sum_max_abs_envy_scaled(instance) -> float:
     sum_mae = min_sum_max_abs_envy(instance)
     return sum_mae / instance.agents_count
+
 
 # Returns the runtime for finding the minimal sum of the maximal absolute envies for 'instance'.
 def min_sum_max_abs_envy_time(instance):

@@ -97,7 +97,7 @@ def min_demand(instance):
         for r in range(instance.resources_count)
     )
 
-
+# Maximum demand
 def max_demand(instance):
     return max(
         sum(instance[a][r] for a in range(instance.agents_count))
@@ -115,7 +115,7 @@ def eff_m(instance):
         i += 1
     return i
 
-
+# Fraction of agents who are single-minded
 def frac_sm(instance):
     sm_num = 0
     for a in range(instance.agents_count):
@@ -137,3 +137,18 @@ def density(instance):
         if instance.utility_matrix[a][r] > 0
     ]
     return len(nonzeros) / (instance.agents_count * instance.resources_count)
+
+# Preference diversity
+def preference_diversity(instance):
+    dist = []
+    for i in range(instance.agents_count):
+        ui = [float(e) for e in instance.utility_matrix[i]]
+        for j in range(instance.agents_count):
+            uj = [float(e) for e in instance.utility_matrix[j]]
+            dist.append(spatial.distance.euclidean(ui, uj))
+
+    return sum(dist) / len(dist)
+
+def sum_pref_demand_div_one_minus_picki(instance):
+    return preference_diversity(instance) + diversity_of_demand(instance) + 1 - pickiness(instance)
+
