@@ -10,6 +10,7 @@ import mapel.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational
 
+from sklearn.preprocessing import normalize
 
 def contention_alloct_matrix(agents_cnt, resources_cnt):
     # 1 0 0 … 0
@@ -156,8 +157,19 @@ def dirichlet_shift_matrix(agents_cnt, resources_cnt, shift_val, alphas=None):
         shift_by = i * shift_val
         new_row = [Fraction(0)] * row_len
         for j in range(row_len):
-            new_row_index = (j + shift_by) % row_len
-            new_row[new_row_index] = non_shifted_matrix[i][j]
+          new_row_index = (j + shift_by) % row_len
+          new_row[new_row_index] = non_shifted_matrix[i][j]
         new_matrix.append(new_row)
 
     return new_matrix
+
+def uniform_matrix(agents_cnt, resources_cnt):
+    new_matrix = default_rng().uniform(size=(agents_cnt, resources_cnt))
+    normed = normalize(new_matrix, axis=1, norm="l1")
+    return float_matrix_to_rational(normed)
+
+def expon_matrix(agents_cnt, resources_cnt, rate):
+    new_matrix = default_rng().exponential(scale = 1/rate, size=(agents_cnt,
+                                                                 resources_cnt))
+    normed = normalize(new_matrix, axis=1, norm="l1")
+    return float_matrix_to_rational(normed)

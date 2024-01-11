@@ -39,6 +39,8 @@ registered_cultures_of_alloct_matrix = {
     "indsep": paths.get_indsep_convex_utility_matrix,
     "consep": paths.get_consep_convex_utility_matrix,
     "indcon": paths.get_indcon_convex_utility_matrix,
+    "uniform": basic.uniform_matrix,
+    "expon": basic.expon_matrix
 }
 
 
