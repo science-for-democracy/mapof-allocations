@@ -99,10 +99,10 @@ def min_demand(instance):
 
 # Maximum demand
 def max_demand(instance):
-    return max(
+    return float(max(
         sum(instance[a][r] for a in range(instance.agents_count))
         for r in range(instance.resources_count)
-    )
+    ))
 
 
 def eff_m(instance):
