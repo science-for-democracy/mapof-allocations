@@ -7,6 +7,8 @@ import time
 from matplotlib import pyplot as plt
 from scipy.stats import stats
 from tqdm import tqdm
+import numpy as np
+from matplotlib.patches import Polygon, Wedge
 
 import mapel.allocations.core.logs as logs
 
@@ -18,7 +20,7 @@ from mapel.core.utils import get_instance_id, make_folder_if_do_not_exist
 from mapel.core.persistence.experiment_exports import export_feature_to_file
 import mapel.allocations.metrics.surveying as surveying
 from mapel.allocations.core.pot import registered_features_of_alloct_matrix
-
+from mapel.core.printing import _add_textual, basic_coloring, basic_coloring_with_shading, _basic_background, _saveas_tex
 
 class AllocationExperiment(Experiment):
     @classmethod
@@ -115,6 +117,8 @@ class AllocationExperiment(Experiment):
 
                 if 'marker' in row.keys():
                     marker = str(row['marker']).strip()
+                    if marker == "none":
+                        continue
 
                 if val := row.get("agents_count", None):
                     agents_count = int(val)
@@ -427,3 +431,126 @@ class AllocationExperiment(Experiment):
             plt.savefig(f'images/correlation/{saveas}', pad_inches=1)
             if show:
                 plt.show()
+
+def print_map_2d_features(experiment: Experiment,
+    feat_name1: str,
+    feat_name2: str,
+    xlabel=None,
+    shading=False,
+    legend_pos=None,
+    title_pos=None,
+    textual=None,
+    title=None,
+    bbox_inches='tight',
+    saveas=None,
+    show=True,
+    ms=20,
+    tex=False,
+    legend=True,
+    dpi=250,
+    title_size=16,
+    textual_size=16,
+    figsize=(6.4, 6.4),
+    pad_inches=None) -> None:
+
+    def shade_region(na, mi, ax):
+        margin = 0.15
+        inner_color = "white"
+        outer_color = "whitesmoke"
+
+        # Create circle and polygon patches
+        circle = Wedge((0, 0), np.sqrt(na), 360, 90, color=inner_color, zorder=-2)
+        polygon1 = Polygon(
+            np.array(
+                [[0, 0], [2 * np.sqrt(na / 2), 0], [np.sqrt(na / 2), np.sqrt(na / 2)]]
+            ),
+            closed=True,
+            color=outer_color,
+            zorder=-1,
+        )
+
+        polygon2 = Polygon(
+            np.array(
+                [
+                    [0, 0],
+                    [0, np.sqrt(na / mi)],
+                    [np.sqrt(na), np.sqrt(na / mi)],
+                    [np.sqrt(na), 0],
+                ]
+            ),
+            closed=True,
+            color=outer_color,
+            zorder=-1,
+        )
+        
+        polygon3 = Polygon(
+            np.array(
+                [
+                    [-2 * margin, 0],
+                    [-2 * margin, np.sqrt(na)],
+                    [0, np.sqrt(na)],
+                    [0, 0],
+                ]
+            ),
+            closed=True,
+            color=outer_color,
+            zorder=-1,
+        )
+        ax.set_facecolor(outer_color)
+
+        # Add patches to plot
+        ax.add_patch(circle)
+        ax.add_patch(polygon1)
+        ax.add_patch(polygon2)
+        ax.add_patch(polygon3)
+
+        # Set limits and labels
+        plt.xlim(-margin, np.sqrt(na / 2) + margin)
+        plt.ylim(np.sqrt(na / mi) - margin, np.sqrt(na) + margin)
+        plt.xlabel("σ₂")  # , fontsize=25)
+        plt.ylabel("σ₁")  # , fontsize=25)
+
+    experiment.compute_feature(feat_name1)
+    experiment.compute_feature(feat_name2)
+    all_feat1 = experiment.import_feature(feature_id=feat_name1)
+    all_feat2 = experiment.import_feature(feature_id=feat_name2)
+    experiment.coordinates = {}
+    for i, v in all_feat1.items():
+        experiment.coordinates[i] = [v, all_feat2[i]]
+    
+    if textual is None:
+        textual = []
+
+    experiment.compute_coordinates_by_families()
+
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot()
+    plt.axis('equal')
+
+    if feat_name1 == "slsvd" and feat_name2 == "lsvd":
+        # TODO Not nice...
+        n = None
+        m = None
+        for family_info in experiment.families.values():
+            n = family_info.agents_count
+            m = family_info.resources_count
+            break
+        assert n is not None and m is not None
+        shade_region(n, m, ax)
+ 
+    _add_textual(experiment=experiment, textual=textual, ax=ax, size=textual_size)
+
+    if shading:
+        basic_coloring_with_shading(experiment=experiment, ax=ax, ms=ms)
+    else:
+        basic_coloring(experiment=experiment, ax=ax, dim=2, textual=textual, ms=ms)
+
+    _basic_background(ax=ax, legend=legend, pad_inches=pad_inches,
+                      saveas=saveas, xlabel=xlabel, bbox_inches=bbox_inches,
+                      title=title, legend_pos=legend_pos, title_size=title_size,
+                      title_pos=title_pos, dpi=dpi)
+    
+    if tex:
+        _saveas_tex(saveas=saveas)
+    if show:
+        plt.show()
