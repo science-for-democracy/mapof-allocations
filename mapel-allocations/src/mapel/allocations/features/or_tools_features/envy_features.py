@@ -218,7 +218,7 @@ def envy_free_or_tools(
         # Upper bound of the absoluty envy for each pair of agents
         max_val = max([sum(i) for i in data.utilities])
         if milp:
-            abs_env = model.IntVar(-max_val, max_val, f"abs_env")  # type: ignore
+            abs_env = model.Var(-max_val, max_val, False, f"abs_env")  # type: ignore
         else:
             abs_env = model.NewIntVar(-max_val, max_val, f"abs_env")
 
@@ -335,7 +335,7 @@ def pareto_dominating_or_tools(
         # Upper bound of the absoluty envy for each pair of agents
         max_val = max([sum(i) for i in data.utilities])
         if milp:
-            abs_env = model.IntVar(-max_val, max_val, f"abs_env")  # type: ignore
+            abs_env = model.Var(-max_val, max_val, False, f"abs_env")  # type: ignore
         else:
             abs_env = model.NewIntVar(-max_val, max_val, f"abs_env")
 
@@ -593,7 +593,7 @@ def sum_abs_envs_or_tools(
     max_val = max([sum(i) for i in data.utilities])
     if milp:
         abs_envy_ag = {
-            agent: model.IntVar(-max_val, max_val, f"abs_env_{agent}")  # type: ignore
+            agent: model.Var(-max_val, max_val, False, f"abs_env_{agent}")  # type: ignore
             for agent in agents
         }
 
