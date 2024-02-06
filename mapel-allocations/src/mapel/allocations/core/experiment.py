@@ -355,7 +355,8 @@ class AllocationExperiment(Experiment):
                                            title=None, all=False, my_list=None,
                                            s=12, alpha=0.25, color='purple',
                                            title_size=24, label_size=20, ticks_size=10,
-                                           saveas=None):
+                                           saveas=None,
+                                           show=False):
 
         all_features = {}
 
@@ -424,4 +425,5 @@ class AllocationExperiment(Experiment):
             if saveas is None:
                 saveas = f'corr_{name_1}_{name_2}'
             plt.savefig(f'images/correlation/{saveas}', pad_inches=1)
-            plt.show()
+            if show:
+                plt.show()
