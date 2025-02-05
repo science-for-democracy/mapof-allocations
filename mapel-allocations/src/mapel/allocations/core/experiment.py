@@ -348,7 +348,7 @@ class AllocationExperiment(Experiment):
 
         if self.is_exported:
             feature_long_id = feature_id
-            export_feature_to_file(self, feature_id, feature_long_id, feature_dict)
+            export_feature_to_file(self, feature_id, feature_dict, f"{feature_id}")
 
         self.features[feature_id] = feature_dict
         return feature_dict
