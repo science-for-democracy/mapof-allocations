@@ -9,17 +9,33 @@ import mapel.core.inner_distances as inner_distances
 
 def fast_distance(left_task, right_task, *args, **kwargs):
     logger.debug("Computing single fast distance")
-    cost_table = get_matching_cost_table(left_task, right_task)
-    return matchings.solve_matching_vectors(cost_table)
+    cost_table = get_matching_cost_table(left_task, right_task, inner_distances.l1)
+    #print(cost_table)
+    t = matchings.solve_matching_vectors(cost_table)
+    #print(float(t[0]))
+    #print("---")
+    return t
+
+def fast_distance_ell2(left_task, right_task, *args, **kwargs):
+    logger.debug("Computing single fast distance")
+    cost_table = get_matching_cost_table(left_task, right_task, inner_distances.l2)
+    #print(cost_table)
+    t = matchings.solve_matching_vectors(cost_table)
+    #print(float(t[0]))
+    #print("---")
+    return t
 
 
-def get_matching_cost_table(left_task, right_task):
+
+def get_matching_cost_table(left_task, right_task, inner_dist):
     """ Return: Cost table """
 
     vectors_1 = convert_to_vectors(left_task)
+    #print(vectors_1)
     vectors_2 = convert_to_vectors(right_task)
+    #print(vectors_2)
     size = left_task.resources_count
-    return [[inner_distances.l1(vectors_1[i], vectors_2[j]) for i in range(size)] for j in range(size)]
+    return [[float(inner_dist(vectors_1[i], vectors_2[j])) for i in range(size)] for j in range(size)]
 
 
 def convert_to_vectors(task):
