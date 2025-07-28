@@ -122,6 +122,28 @@ def blurred_separability_alloct_matrix(agents_cnt, resources_cnt, ratio=0):
         new_matrix.append(new_row)
     return new_matrix
 
+def block_alloct_matrix(agents_cnt, resources_cnt, per_row_zeros_cnt):
+    logger.debug(f"Generating block matrix with zeros per row: {per_row_zeros_cnt}")
+    block_size = int(resources_cnt/agents_cnt * per_row_zeros_cnt)
+    #if block_size > resources_cnt/2:
+    #    raise ValueError(f"Block size must be at most half the number of resources")
+    #if per_row_zeros_cnt > agents_cnt/2:
+    #    raise ValueError(f"Zeros per row be more than half the number of agents")
+
+    entry_value = Fraction(1, int(resources_cnt - block_size))
+
+    alloct_matrix = []
+
+    for i in range(agents_cnt):
+        row = [entry_value] * resources_cnt
+        alloct_matrix.append(row)
+    for i in range(resources_cnt):
+        for j in range(per_row_zeros_cnt):
+            alloct_matrix[(i+j)%agents_cnt][i] = 0
+    
+    return alloct_matrix
+
+
 def dirichlet_matrix(agents_cnt, resources_cnt, alphas=None):
     """For each agent independently, draw their values from a
   scaled Dirichlet distribution. The Dirichlet distribution

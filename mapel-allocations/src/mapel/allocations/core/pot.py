@@ -35,12 +35,19 @@ registered_cultures_of_alloct_matrix = {
     "blurred_separability": basic.blurred_separability_alloct_matrix,
     "attributes": euc.attributes_alloc_matrix,
     "approval_dirichlet": apprd.approval_dirichlet,
+    "approval_gen_dirichlet": apprd.approval_gen_dirichlet,
     "euclidean": euc.euclidean_alloc_matrix,
     "indsep": paths.get_indsep_convex_utility_matrix,
     "consep": paths.get_consep_convex_utility_matrix,
     "indcon": paths.get_indcon_convex_utility_matrix,
+    "conbcon": paths.get_conbcon_convex_utility_matrix,
+    "bconsep": paths.get_bconsep_convex_utility_matrix,
+    "wsepind": paths.get_wsepind_convex_utility_matrix,
+    "sepwsep": paths.get_sepwsep_convex_utility_matrix,
+    "bconwsep": paths.get_bconwsep_convex_utility_matrix,
     "uniform": basic.uniform_matrix,
-    "expon": basic.expon_matrix
+    "expon": basic.expon_matrix,
+    "block": basic.block_alloct_matrix
 }
 
 
