@@ -137,14 +137,12 @@ def get_sepwsep_convex_utility_matrix(agents_cnt, resources_cnt, alpha=None):
         alpha = np.random.random()
 
     matrix = [[Fraction(0) for _ in range(resources_cnt)] for _ in range(agents_cnt)]
-    SEP = separability_alloct_matrix(agents_cnt, resources_cnt)
-    WSEP = wide_separability_alloct_matrix(agents_cnt, resources_cnt)
 
     for i in range(agents_cnt):
-        for j in range(resources_cnt):
-            a = alpha * SEP[i][j]
-            b = (1-alpha) * WSEP[i][j]
-            matrix[i][j] = Fraction(a+b)
+        first = 2*i % resources_cnt
+        second = (first + 1) % resources_cnt
+        matrix[i][first] = Fraction(0.5 + 0.5*alpha)
+        matrix[i][second] = Fraction(0.5 - 0.5*alpha)
 
     return matrix
 
