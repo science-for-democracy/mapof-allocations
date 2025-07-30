@@ -65,8 +65,8 @@ def approval_gen_dirichlet(agents_cnt=None,
         else:
             alphas = [1e-10 for _ in range(resources_cnt)]
             for j, candidate in enumerate(sorted(map(int, vote))):
-                scaled_j = j / resources_cnt
-                alphas[int(candidate)] = 1/math.pow(scaled_j + 0.01, t)
+                scaled_j = j / resources_cnt 
+                alphas[int(candidate)] = 2*(1/math.pow(scaled_j + 0.01, t))
             vector = default_rng().dirichlet(alphas, size=1)[0].tolist()
 
         utility_matrix.append(list(map(Fraction, vector)))

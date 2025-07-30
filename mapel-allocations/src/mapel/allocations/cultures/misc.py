@@ -11,7 +11,7 @@ def check_agents_and_resources_counts(utility_matrix, agents_cnt, resources_cnt)
                          f"{agents_cnt} agents")
     for agent_utils in utility_matrix:
         if len(agent_utils) != resources_cnt:
-            logger.warning("cd")
+            logger.warning(f"Some agent does not report {resources_cnt} utility values.")
             raise ValueError(f"At least one of the agents does not report "
                              f"{resources_cnt} utility values.")
 
