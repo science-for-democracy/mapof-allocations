@@ -18,6 +18,7 @@ from .helpers import (
 )
 from .maximin_feature import get_mms_fair
 from .nash_welfare_feature import nash_or_tools
+from .prop_share import alpha_prop_share
 from .social_welfare_feature import max_social_welfare
 
 
@@ -118,15 +119,20 @@ def relative_envy_time(instance):
 # taking only 4 decimal places of floats into account ('get_int_utility_matrix_accuracy').
 # If no solution can be determined with the help of the function "nash_or_tools",
 # 0 is returned.
-# This is currently not used
-def nash_helper(instance):
+def nash_helper(instance, decimal_places: None | int = None):
     umatrix = instance.utility_matrix
-    utils_ints = get_int_utility_matrix(umatrix)
-    if max(sum(i) for i in utils_ints) > 10**5:
-        utils_decimal = get_int_utility_matrix_accuracy(umatrix, decimal_places=4)
+    if decimal_places is not None:
+        utils_decimal = get_int_utility_matrix_accuracy(
+            umatrix, decimal_places=decimal_places
+        )
         data = FeatureData(utils_decimal)
     else:
-        data = FeatureData(utils_ints)
+        utils_ints = get_int_utility_matrix(umatrix)
+        if max(sum(i) for i in utils_ints) > 10**5:
+            utils_decimal = get_int_utility_matrix_accuracy(umatrix, decimal_places=4)
+            data = FeatureData(utils_decimal)
+        else:
+            data = FeatureData(utils_ints)
 
     with Timer() as t:
         sol, _ = nash_or_tools(data)
@@ -135,22 +141,9 @@ def nash_helper(instance):
     return FeatureData(instance.utility_matrix).get_nash_welfare(sol), t.time
 
 
-# Returns the maximum Nash welfare for 'instance'.
-# This is currently not used.
-def nash(instance):
-    value, _ = nash_helper(instance)
-    return value
-
-
-# Returns the runtime of searching the maximum Nash welfare for 'instance'.
-# This is currently not used.
-def nash_time(instance):
-    _, t = nash_helper(instance)
-    return t
-
-
-# Returns the maximum Nash welfare for 'instance' and the time needed for finding it.
-def nash_helper_new(instance):
+# Returns the maximum Nash welfare for 'instance' by exhaustively trying all allocations
+# and the time needed for finding it.
+def nash_exhaustive(instance):
     fdata = FeatureData(instance.utility_matrix)
     res_num: int = instance.resources_count
     ag_num: int = instance.agents_count
@@ -184,16 +177,21 @@ def nash_helper_new(instance):
 
 
 # Returns the maximum Nash welfare for 'instance'.
-def nash_new(instance):
-    value, _ = nash_helper_new(instance)
+def nash(instance):
+    value, _ = nash_helper(instance)
+    # value, _ = nash_exhaustive(instance)
     return value
 
 
 # Returns the runtime of searching the maximum Nash welfare for 'instance'.
-def nash_time_new(instance):
-    _, t = nash_helper_new(instance)
+def nash_time(instance):
+    _, t = nash_helper(instance)
     return t
 
+# Returns the maximum Nash welfare for 'instance', but using a lower precision.
+def nash_lp(instance):
+    value, _ = nash_helper(instance, 3)
+    return value
 
 # Helper for finding envy-free and pareto optimal allocations (with maximal social welfare).
 def envy_pareto_helper(
@@ -457,3 +455,41 @@ def min_sum_max_abs_envy_scaled(instance) -> float:
 def min_sum_max_abs_envy_time(instance):
     _, _, _, t = sum_abs_helper(instance)
     return t
+
+
+# Returns the maximal alpha so that an alpha-proportional share exists
+# First, a helper
+def a_prop_share_helper(instance) -> tuple[float | None, str, float | None, float]:
+    umatrix = instance.utility_matrix
+    utils_ints = get_int_utility_matrix(umatrix)
+    data_ints = FeatureData(utils_ints)
+
+    def do_if_int_not_poss():
+        utils_floats = get_float_utility_matrix(umatrix)
+        with Timer() as t:
+            sol, status, obj = alpha_prop_share(FeatureData(utils_floats))
+        return sol, status, obj, t.time
+
+    try:
+        with Timer() as t:
+            sol, status, obj = alpha_prop_share(data_ints)
+        if status == "MODEL_INVALID":
+            return do_if_int_not_poss()
+        return sol, status, obj, t.time
+    except:
+        return do_if_int_not_poss()
+
+
+def a_prop_share(instance):
+    sol, _, _, _ = a_prop_share_helper(instance)
+    return sol
+
+
+# Returns 1.0 if an proportional share allocation exists for 'instance',
+# otherwise 0.0.
+def exists_prop_share(instance):
+    alpha = a_prop_share(instance)
+    assert alpha is not None
+    if alpha >= 1:
+        return 1.0
+    return 0.0
