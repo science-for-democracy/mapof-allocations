@@ -178,8 +178,8 @@ def nash_exhaustive(instance):
 
 # Returns the maximum Nash welfare for 'instance'.
 def nash(instance):
-    value, _ = nash_helper(instance)
-    # value, _ = nash_exhaustive(instance)
+    # value, _ = nash_helper(instance)
+    value, _ = nash_exhaustive(instance)
     return value
 
 
