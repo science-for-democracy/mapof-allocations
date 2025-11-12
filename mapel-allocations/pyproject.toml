@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=65", "wheel", "pybind11>=2.6.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapel-allocations"
+version = "1.0.0.dev1"
+authors = [
+ {name = "Stanislaw Szufa", email = "s.szufa@gmail.com"},
+ {name = "Andrzej Kaczmarczyk", email = "andrzej.kaczmarczyk@agh.edu.pl"},
+ {name = "Paul Goelz", email = "goelz@g.harvard.edu"},
+ {name = "Paula Böhm", email = "paulaboehm14@gmail.com"}
+]
+description = "Map of Elections---allocations"
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+requires-python = ">=3.7"
+license = {file = "LICENSE.txt"}
+readme = "README.md"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
