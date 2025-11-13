@@ -1,7 +1,7 @@
 import os
 from fractions import Fraction
 
-from mapel.allocations.core.alloctask import AllocationTask, AllocationTaskLibrarian
+from mapof.allocations.core.alloctask import AllocationTask, AllocationTaskLibrarian
 
 class TestLibrarian:
   matrix = [
@@ -17,6 +17,11 @@ class TestLibrarian:
          "1/2 3/10 1/5",
          "0 1 0",
          "1/5 2/5 3/5",
+         "",
+         "# 0.1\t0.7\t0.2",
+         "# 0.5\t0.3\t0.2",
+         "# 0.0\t1.0\t0.0",
+         "# 0.2\t0.4\t0.6"
         ]
 
   def _save_test_matrix(self):
@@ -32,7 +37,7 @@ class TestLibrarian:
       try:
         os.remove("test_id.alt")
       except:
-        assert False, "Saving did not work properly"
+          assert False, "Saving did not work properly"
 
   def test_saving_in_tree(self):
     nested_location = "test/directory/blah"
@@ -53,9 +58,10 @@ class TestLibrarian:
       self._save_test_matrix()
       with open("test_id.alt", "r") as ffile: 
         for i, line in enumerate(ffile):
+          print(line)
           assert self.correct_file_lines[i] == line.strip(), f"Line {i+1} contains an incorrect content"
-    except:
-      assert False, "Saving did not work properly"
+    except Exception as e:
+      assert False, f"Saving did not work properly: {e}"
     finally:
       try:
         os.remove("test_id.alt")
@@ -68,10 +74,9 @@ class TestLibrarian:
         for line in self.correct_file_lines:
           ffile.write(f"{line}\n")
       librarian = AllocationTaskLibrarian()
-      alloc = librarian.read("test_id", ".")
-      assert alloc.agents_count == 4
-      assert alloc.resources_count == 3
-      assert alloc.utility_matrix == self.matrix
+      alloc = librarian.read("test_id.alt")
+      print(alloc)
+      assert alloc == self.matrix
     finally:
       try:
         os.remove("test_id.alt")
