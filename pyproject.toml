@@ -7,7 +7,7 @@ name = "mapof-allocations"
 authors = [
  {name = "Stanisław Szufa", email = "s.szufa@gmail.com"},
  {name = "Andrzej Kaczmarczyk", email = "andrzej.kaczmarczyk@agh.edu.pl"},
- {name = "Paula Böhm", email = "paulaboehm14@gmail.com"}
+ {name = "Paula Böhm", email = "paulaboehm14@gmail.com"},
  {name = "Paul Gölz", email = "mail@paulgoelz.de"},
 ]
 description = "Map of Allocations"
