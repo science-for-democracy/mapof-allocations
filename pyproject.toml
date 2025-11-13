@@ -5,10 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mapof-allocations"
 authors = [
- {name = "Stanisław Szufa", email = "s.szufa@gmail.com"},
- {name = "Andrzej Kaczmarczyk", email = "andrzej.kaczmarczyk@agh.edu.pl"},
  {name = "Paula Böhm", email = "paulaboehm14@gmail.com"},
  {name = "Paul Gölz", email = "mail@paulgoelz.de"},
+ {name = "Andrzej Kaczmarczyk", email = "andrzej.kaczmarczyk@agh.edu.pl"},
+ {name = "Stanisław Szufa", email = "s.szufa@gmail.com"},
+]
+maintainers = [
+ {name = "Andrzej Kaczmarczyk", email = "andrzej.kaczmarczyk@agh.edu.pl"},
+ {name = "Stanisław Szufa", email = "s.szufa@gmail.com"},
 ]
 description = "Map of Allocations"
 classifiers=[
