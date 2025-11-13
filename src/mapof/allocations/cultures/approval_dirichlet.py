@@ -20,8 +20,7 @@ def approval_dirichlet(agents_cnt=None,
         culture_id = "resampling",
         num_voters=agents_cnt,
         num_candidates=resources_cnt,
-        phi=phi,
-        rel_size_central_vote=p)
+        params={"phi":phi, "rel_size_central_vote":p})
 
     utility_matrix = []
 
@@ -42,7 +41,7 @@ def approval_dirichlet(agents_cnt=None,
 
 def approval_gen_dirichlet(agents_cnt=None,
                        resources_cnt=None,
-                       phi=None, p=None, t=None):
+                       phi=None, p=None, t=2):
     if phi is None:
         phi = np.random.random()
     if p is None:
@@ -52,8 +51,7 @@ def approval_gen_dirichlet(agents_cnt=None,
         culture_id = "resampling",
         num_voters=agents_cnt,
         num_candidates=resources_cnt,
-        phi=phi,
-        rel_size_central_vote=p)
+        params={"phi":phi, "rel_size_central_vote":p})
 
     utility_matrix = []
 
