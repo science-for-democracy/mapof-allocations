@@ -1,3 +1,6 @@
+[![Tests](https://github.com/science-for-democracy/mapof-allocations/actions/workflows/python-tests.yml/badge.svg)](https://github.com/science-for-democracy/mapof-allocations/actions/workflows/python-tests.yml)
+[![codecov](https://codecov.io/github/science-for-democracy/mapof-allocations/graph/badge.svg?token=HxjjPHngaG)](https://codecov.io/github/science-for-democracy/mapof-allocations)
+
 # Mapof-allocations
 This pacakge is a plugin for [Mapof](https://pypi.org/project/mapof/) extending
 it with capabilities of drawing maps of various election intances.
