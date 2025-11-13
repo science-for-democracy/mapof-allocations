@@ -1,8 +1,8 @@
 import os
 from fractions import Fraction
 
-from mapel.core.utils import make_folder_if_do_not_exist
-import mapel.allocations.core.logs as logs
+from mapof.core.utils import make_folder_if_do_not_exist
+import mapof.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
 
 class AllocationTaskLibrarian:

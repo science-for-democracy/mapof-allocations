@@ -5,10 +5,10 @@ from fractions import Fraction
 from numpy.random import default_rng
 import random
 
-from mapel.elections.cultures_ import generate_approval_votes
-from mapel.elections.cultures_ import generate_ordinal_votes
-from mapel.elections.objects.OrdinalElection import update_params_ordinal
-from mapel.elections.objects.ApprovalElection import update_params_approval
+from mapof.elections.cultures import generate_approval_votes
+from mapof.elections.cultures import generate_ordinal_votes
+from mapof.elections.objects.OrdinalElection import update_params_ordinal
+from mapof.elections.objects.ApprovalElection import update_params_approval
 
 
 def convert_approval_votes_to_utility_matrix(culture_id=None,

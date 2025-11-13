@@ -1,10 +1,10 @@
 from fractions import Fraction
 import os
-import mapel.allocations.core.logs as logs
+import mapof.allocations.core.logs as logs
 logger = logs.get_logger(__name__)
-from mapel.core.objects.Instance import Instance
-from mapel.allocations.core.alloctasklibrarian import AllocationTaskLibrarian
-import mapel.allocations.core.pot as pot
+from mapof.core.objects.Instance import Instance
+from mapof.allocations.core.alloctasklibrarian import AllocationTaskLibrarian
+import mapof.allocations.core.pot as pot
 
 
 class AllocationTask(Instance):

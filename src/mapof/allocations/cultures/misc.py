@@ -1,8 +1,8 @@
-import mapel.allocations.core.logs as logs
+import mapof.allocations.core.logs as logs
 
 logger = logs.get_logger(__name__)
 from .tools import float_matrix_to_rational
-import mapel.allocations.core.alloctasklibrarian as librarian
+import mapof.allocations.core.alloctasklibrarian as librarian
 
 
 def check_agents_and_resources_counts(utility_matrix, agents_cnt, resources_cnt):

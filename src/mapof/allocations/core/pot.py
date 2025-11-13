@@ -1,19 +1,19 @@
 from fractions import Fraction
 
-import mapel.allocations.core.logs as logs
+import mapof.allocations.core.logs as logs
 
 logger = logs.get_logger(__name__)
 
-import mapel.allocations.cultures.basic_cultures as basic
-import mapel.allocations.cultures.euclidean as euc
+import mapof.allocations.cultures.basic_cultures as basic
+import mapof.allocations.cultures.euclidean as euc
 
-import mapel.allocations.cultures.misc as misc
-import mapel.allocations.cultures.converter as converter
-import mapel.allocations.cultures.paths as paths
-import mapel.allocations.cultures.approval_dirichlet as apprd
+import mapof.allocations.cultures.misc as misc
+import mapof.allocations.cultures.converter as converter
+import mapof.allocations.cultures.paths as paths
+import mapof.allocations.cultures.approval_dirichlet as apprd
 
-import mapel.allocations.features.basic_features as features
-import mapel.allocations.features.or_tools_features.wrapper as or_features
+import mapof.allocations.features.basic_features as features
+import mapof.allocations.features.or_tools_features.wrapper as or_features
 
 
 registered_cultures_of_alloct_matrix = {

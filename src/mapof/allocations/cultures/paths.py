@@ -1,5 +1,5 @@
 from fractions import Fraction
-from mapel.allocations.cultures.basic_cultures import *
+from mapof.allocations.cultures.basic_cultures import *
 import numpy as np
 
 # depr

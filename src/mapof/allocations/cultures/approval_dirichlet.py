@@ -4,9 +4,8 @@ from numpy.random import default_rng
 import random
 import math
 
-from mapel.elections.cultures.resampling import generate_approval_resampling_votes
-# from mapel.elections.objects.ApprovalElection import update_params_approval
-from mapel.allocations.cultures.basic_cultures import dirichlet_matrix
+from mapof.elections.cultures import generate_approval_votes
+from mapof.allocations.cultures.basic_cultures import dirichlet_matrix
 
 
 def approval_dirichlet(agents_cnt=None,
@@ -17,11 +16,12 @@ def approval_dirichlet(agents_cnt=None,
     if p is None:
         p = np.random.random()
 
-    approval_votes = generate_approval_resampling_votes(
+    approval_votes = generate_approval_votes(
+        culture_id = "resampling",
         num_voters=agents_cnt,
         num_candidates=resources_cnt,
         phi=phi,
-        p=p)
+        rel_size_central_vote=p)
 
     utility_matrix = []
 
@@ -48,11 +48,12 @@ def approval_gen_dirichlet(agents_cnt=None,
     if p is None:
         p = np.random.random()
 
-    approval_votes = generate_approval_resampling_votes(
+    approval_votes = generate_approval_votes(
+        culture_id = "resampling",
         num_voters=agents_cnt,
         num_candidates=resources_cnt,
         phi=phi,
-        p=p)
+        rel_size_central_vote=p)
 
     utility_matrix = []
 
